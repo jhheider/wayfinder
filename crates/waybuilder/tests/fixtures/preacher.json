@@ -1,0 +1,387 @@
+{
+  "success": true,
+  "build": {
+    "name": "Preacher",
+    "class": "Sorcerer (Wellspring Magic)",
+    "dualClass": null,
+    "level": 6,
+    "xp": 0,
+    "ancestry": "Human",
+    "heritage": "Versatile Human",
+    "background": "Wanted Witness",
+    "alignment": "N",
+    "gender": "male",
+    "age": "40",
+    "deity": "None",
+    "size": 2,
+    "sizeName": "Medium",
+    "keyability": "cha",
+    "languages": ["Chthonian", "Common"],
+    "rituals": [],
+    "resistances": [],
+    "inventorMods": [],
+    "abilities": {
+      "str": 10,
+      "dex": 18,
+      "con": 14,
+      "int": 10,
+      "wis": 14,
+      "cha": 19,
+      "breakdown": {
+        "ancestryFree": ["Cha", "Dex"],
+        "ancestryBoosts": [],
+        "ancestryFlaws": [],
+        "backgroundBoosts": ["Cha", "Dex"],
+        "classBoosts": ["Cha"],
+        "mapLevelledBoosts": {
+          "1": ["Wis", "Con", "Dex", "Cha"],
+          "5": ["Con", "Wis", "Dex", "Cha"]
+        }
+      }
+    },
+    "attributes": {
+      "ancestryhp": 8,
+      "classhp": 6,
+      "bonushp": 0,
+      "bonushpPerLevel": 0,
+      "speed": 25,
+      "speedBonus": 0
+    },
+    "proficiencies": {
+      "classDC": 2,
+      "perception": 2,
+      "fortitude": 4,
+      "reflex": 4,
+      "will": 4,
+      "heavy": 0,
+      "medium": 0,
+      "light": 0,
+      "unarmored": 2,
+      "advanced": 0,
+      "martial": 0,
+      "simple": 2,
+      "unarmed": 2,
+      "castingArcane": 0,
+      "castingDivine": 2,
+      "castingOccult": 0,
+      "castingPrimal": 0,
+      "acrobatics": 0,
+      "arcana": 0,
+      "athletics": 0,
+      "crafting": 0,
+      "deception": 0,
+      "diplomacy": 2,
+      "intimidation": 4,
+      "medicine": 4,
+      "nature": 0,
+      "occultism": 0,
+      "performance": 0,
+      "religion": 2,
+      "society": 2,
+      "stealth": 2,
+      "survival": 0,
+      "thievery": 0,
+      "piloting": 0,
+      "computers": 0
+    },
+    "mods": {},
+    "feats": [
+      ["Read Lips", null, "Awarded Feat", 1],
+      [
+        "Versatile Human",
+        null,
+        "Heritage",
+        1,
+        "Heritage Feat",
+        "parentChoice",
+        null
+      ],
+      [
+        "Battle Medicine",
+        null,
+        "General Feat",
+        1,
+        "Heritage Featversatile heritage",
+        "childChoice",
+        "Heritage Feat"
+      ],
+      [
+        "Natural Ambition",
+        null,
+        "Ancestry Feat",
+        1,
+        "Human Feat 1",
+        "parentChoice",
+        null
+      ],
+      [
+        "Reach Spell",
+        null,
+        "Class Feat",
+        1,
+        "Natural Ambition Class FeatHuman Feat 1",
+        "childChoice",
+        "Human Feat 1"
+      ],
+      [
+        "Godless Healing",
+        null,
+        "Skill Feat",
+        2,
+        "Skill Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Wellspring Mage Dedication",
+        null,
+        "Class Feat",
+        2,
+        "Sorcerer Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Gunslinger Dedication",
+        null,
+        "Archetype Feat",
+        2,
+        "Free Archetype 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Canny Acumen",
+        "Reflex",
+        "General Feat",
+        3,
+        "General Feat 3",
+        "standardChoice",
+        null
+      ],
+      [
+        "Assurance",
+        "Medicine",
+        "Skill Feat",
+        4,
+        "Skill Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Split Shot",
+        null,
+        "Class Feat",
+        4,
+        "Sorcerer Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Wellspring Control",
+        null,
+        "Archetype Feat",
+        4,
+        "Free Archetype 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "General Training",
+        null,
+        "Ancestry Feat",
+        5,
+        "Human Feat 5",
+        "parentChoice",
+        null
+      ],
+      [
+        "Incredible Initiative",
+        null,
+        "General Feat",
+        5,
+        "General Training FeatHuman Feat 5",
+        "childChoice",
+        "Human Feat 5"
+      ],
+      [
+        "Continual Recovery",
+        null,
+        "Skill Feat",
+        6,
+        "Skill Feat 6",
+        "standardChoice",
+        null
+      ],
+      [
+        "Advanced Bloodline",
+        null,
+        "Class Feat",
+        6,
+        "Sorcerer Feat 6",
+        "standardChoice",
+        null
+      ],
+      [
+        "Urgent Upwelling",
+        null,
+        "Archetype Feat",
+        6,
+        "Free Archetype 6",
+        "standardChoice",
+        null
+      ]
+    ],
+    "specials": [
+      "Bloodline: Demonic",
+      "Sorcerous Potency",
+      "Blood Magic",
+      "Way of the Sniper",
+      "Signature Spells",
+      "Magical Fortitude",
+      "Versatile Human"
+    ],
+    "lores": [["City", 2]],
+    "equipmentContainers": {
+      "c2875a4d-3fb8-485c-a68b-507e77898c2e": {
+        "containerName": "Backpack",
+        "bagOfHolding": false,
+        "backpack": true,
+        "augmentations": false
+      }
+    },
+    "equipment": [
+      ["Bullets (10 rounds)", 10, "Invested"],
+      ["Healer's Toolkit", 1, "Invested"],
+      ["Backpack", 1, "Invested"],
+      ["Bedroll", 1, "c2875a4d-3fb8-485c-a68b-507e77898c2e", "Invested"],
+      ["Chalk", 10, "c2875a4d-3fb8-485c-a68b-507e77898c2e", "Invested"],
+      [
+        "Flint and Steel",
+        1,
+        "c2875a4d-3fb8-485c-a68b-507e77898c2e",
+        "Invested"
+      ],
+      ["Rope", 1, "c2875a4d-3fb8-485c-a68b-507e77898c2e", "Invested"],
+      ["Rations", 2, "c2875a4d-3fb8-485c-a68b-507e77898c2e", "Invested"],
+      ["Torch", 5, "c2875a4d-3fb8-485c-a68b-507e77898c2e", "Invested"],
+      ["Waterskin", 1, "c2875a4d-3fb8-485c-a68b-507e77898c2e", "Invested"],
+      ["Soap", 1, "c2875a4d-3fb8-485c-a68b-507e77898c2e", "Invested"]
+    ],
+    "specificProficiencies": {
+      "trained": [],
+      "expert": [],
+      "master": [],
+      "legendary": []
+    },
+    "weapons": [
+      {
+        "name": "Flintlock Pistol",
+        "qty": 1,
+        "prof": "simple",
+        "die": "d4",
+        "pot": 0,
+        "str": "",
+        "mat": null,
+        "display": "Flintlock Pistol",
+        "runes": [],
+        "damageType": "P",
+        "attack": 12,
+        "damageBonus": 0,
+        "extraDamage": [],
+        "increasedDice": false,
+        "isInventor": false
+      },
+      {
+        "name": "Flintlock Musket",
+        "qty": 1,
+        "prof": "simple",
+        "die": "d6",
+        "pot": 0,
+        "str": "",
+        "mat": null,
+        "display": "Flintlock Musket",
+        "runes": [],
+        "damageType": "P",
+        "attack": 12,
+        "damageBonus": 0,
+        "extraDamage": [],
+        "increasedDice": false,
+        "isInventor": false
+      }
+    ],
+    "money": { "cp": 0, "sp": 3, "gp": 4, "pp": 0 },
+    "armor": [
+      {
+        "name": "Explorer's Clothing",
+        "qty": 1,
+        "prof": "unarmored",
+        "pot": 0,
+        "res": "",
+        "mat": null,
+        "display": "Explorer's Clothing",
+        "worn": true,
+        "runes": []
+      }
+    ],
+    "spellCasters": [
+      {
+        "name": "Sorcerer",
+        "magicTradition": "divine",
+        "spellcastingType": "spontaneous",
+        "ability": "cha",
+        "proficiency": 2,
+        "focusPoints": 0,
+        "innate": false,
+        "perDay": [5, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0],
+        "spells": [
+          {
+            "spellLevel": 0,
+            "list": ["Needle Darts", "Guidance", "Void Warp", "Caustic Blast"]
+          },
+          {
+            "spellLevel": 1,
+            "list": ["Mystic Armor", "Heal", "Admonishing Ray", "Fear"]
+          },
+          {
+            "spellLevel": 2,
+            "list": [
+              "Dispel Magic",
+              "Ghoulish Cravings",
+              "Sudden Blight",
+              "Enlarge"
+            ]
+          },
+          {
+            "spellLevel": 3,
+            "list": ["Vampiric Feast", "Heroism", "Moonlight Ray", "Slow"]
+          }
+        ],
+        "prepared": [],
+        "blendedSpells": []
+      }
+    ],
+    "focusPoints": 2,
+    "focus": {
+      "divine": {
+        "cha": {
+          "abilityBonus": 4,
+          "proficiency": 2,
+          "itemBonus": 0,
+          "focusCantrips": [],
+          "focusSpells": ["Glutton's Jaws", "Swamp of Sloth"]
+        }
+      }
+    },
+    "formula": [],
+    "acTotal": {
+      "acProfBonus": 8,
+      "acAbilityBonus": 4,
+      "acItemBonus": 0,
+      "acTotal": 22,
+      "shieldBonus": null
+    },
+    "pets": [],
+    "familiars": []
+  }
+}

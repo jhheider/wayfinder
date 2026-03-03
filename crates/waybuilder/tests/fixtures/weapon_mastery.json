@@ -1,0 +1,92 @@
+{
+  "id": "class-feature-437",
+  "name": "Weapon Mastery",
+  "category": "class-feature",
+  "type": "Class Feature",
+  "url": "/Classes.aspx?ID=17",
+  "text": " Weapon Mastery Source Secrets of Magic pg. 35 2.0 Class Magus --- You fully understand your weapons. Your proficiency ranks for simple weapons, martial weapons, and unarmed attacks increase to master.",
+  "markdown": "<title level=\"1\" right=\"Class Feature 13\">[Weapon Mastery](/Classes.aspx?ID=17)</title>\r\n\r\n<column gap=\"tiny\">\r\n**Source** [Secrets of Magic](/Sources.aspx?ID=96) pg. 35 <sup>2.0</sup>\r\n\r\n**Class** Magus\r\n</column>\r\n\r\n---\r\n\r\nYou fully understand your weapons. Your proficiency ranks for simple weapons, martial weapons, and unarmed attacks increase to master.",
+  "summary": "You fully understand your weapons. Your proficiency ranks for simple weapons, martial weapons, and unarmed attacks increase to master.",
+  "source": [
+    "Secrets of Magic"
+  ],
+  "rarity": "common",
+  "trait": [],
+  "trait_group": [],
+  "pfs": null,
+  "level": 13,
+  "tradition": [],
+  "domain": [],
+  "favored_weapon": [],
+  "sanctification": [],
+  "attribute": [],
+  "deity": [],
+  "remaster_id": [],
+  "legacy_id": [],
+  "rarity_id": 1,
+  "skill_mod": {},
+  "source_category": [
+    "Rulebooks"
+  ],
+  "summary_markdown": "You fully understand your weapons. Your proficiency ranks for simple weapons, martial weapons, and unarmed attacks increase to master.",
+  "speed": {},
+  "primary_source": "Secrets of Magic",
+  "class": "Magus",
+  "source_raw": [
+    "Secrets of Magic pg. 35"
+  ],
+  "weakness": {},
+  "source_markdown": "[Secrets of Magic](/Sources.aspx?ID=96) pg. 35 <sup>2.0</sup>",
+  "primary_source_raw": "Secrets of Magic pg. 35",
+  "resistance": {},
+  "search_markdown": "<additional-info>\r\n**Source** [Secrets of Magic](/Sources.aspx?ID=96) pg. 35 <sup>2.0</sup>\r\n\r\n**Class** Magus\r\n</additional-info>\r\n\r\n---\r\n\r\n<summary>\r\nYou fully understand your weapons. Your proficiency ranks for simple weapons, martial weapons, and unarmed attacks increase to master.\r\n</summary>",
+  "primary_source_category": "Rulebooks",
+  "release_date": "2021-09-01",
+  "exclude_from_search": false,
+  "content": [
+    {
+      "type": "title",
+      "level": 1,
+      "text": "Weapon Mastery",
+      "right": "Class Feature 13",
+      "action": null
+    },
+    {
+      "type": "key_value",
+      "key": "Source",
+      "value": [
+        {
+          "type": "link",
+          "text": "Secrets of Magic",
+          "url": "https://2e.aonprd.com/Sources.aspx?ID=96"
+        },
+        {
+          "type": "text",
+          "text": " pg. 35 2.0"
+        }
+      ]
+    },
+    {
+      "type": "key_value",
+      "key": "Class",
+      "value": [
+        {
+          "type": "text",
+          "text": "Magus "
+        }
+      ]
+    },
+    {
+      "type": "h_rule"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "You fully understand your weapons. Your proficiency ranks for simple weapons, martial weapons, and unarmed attacks increase to master."
+        }
+      ]
+    }
+  ]
+}

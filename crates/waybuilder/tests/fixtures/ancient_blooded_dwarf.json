@@ -1,0 +1,81 @@
+{
+  "id": "heritage-234",
+  "name": "Ancient-Blooded Dwarf",
+  "category": "heritage",
+  "type": "Heritage",
+  "url": "/Heritages.aspx?ID=234",
+  "text": " Ancient-Blooded Dwarf Source Player Core pg. 43 2.0 Dwarven heroes of old could shrug off their enemies' magic, and some of that resistance manifests in you. You gain the Call on Ancient Blood reaction.\n",
+  "markdown": "<title level=\"1\" right=\"Heritage\" pfs=\"Standard\">[Ancient-Blooded Dwarf](/Heritages.aspx?ID=234)</title>\r\n\r\n<traits>\r\n\r\n</traits>\r\n\r\n**Source** [Player Core](/Sources.aspx?ID=216) pg. 43 <sup>2.0</sup>\n\nDwarven heroes of old could shrug off their enemies' magic, and some of that resistance manifests in you. You gain the Call on Ancient Blood reaction.\n\n<document level=\"2\" id=\"action-2254\" />",
+  "summary": "Dwarven heroes of old could shrug off their enemies' magic, and some of that resistance manifests in you. You gain the Call on Ancient Blood …",
+  "source": [
+    "Player Core"
+  ],
+  "rarity": "common",
+  "trait": [],
+  "trait_group": [],
+  "pfs": "Standard",
+  "level": null,
+  "tradition": [],
+  "domain": [],
+  "favored_weapon": [],
+  "sanctification": [],
+  "attribute": [],
+  "deity": [],
+  "remaster_id": [],
+  "legacy_id": [
+    "heritage-1"
+  ],
+  "source_raw": [
+    "Player Core pg. 43"
+  ],
+  "primary_source_category": "Rulebooks",
+  "summary_markdown": "Dwarven heroes of old could shrug off their enemies' magic, and some of that resistance manifests in you. You gain the Call on Ancient Blood …",
+  "trait_markdown": "",
+  "resistance": {},
+  "skill_mod": {},
+  "primary_source": "Player Core",
+  "exclude_from_search": false,
+  "source_markdown": "[Player Core](/Sources.aspx?ID=216) pg. 43 <sup>2.0</sup>",
+  "source_category": [
+    "Rulebooks"
+  ],
+  "speed": {},
+  "rarity_id": 1,
+  "search_markdown": "<traits>\r\n\r\n</traits>\r\n\r\n<additional-info>\r\n**Source** [Player Core](/Sources.aspx?ID=216) pg. 43 <sup>2.0</sup>\r\n</additional-info>\r\n\r\n---\r\n\r\n<summary>\r\nDwarven heroes of old could shrug off their enemies' magic, and some of that resistance manifests in you. You gain the Call on Ancient Blood …\r\n</summary>",
+  "primary_source_raw": "Player Core pg. 43",
+  "weakness": {},
+  "release_date": "2023-11-15",
+  "content": [
+    {
+      "type": "title",
+      "level": 1,
+      "text": "Ancient-Blooded Dwarf",
+      "right": "Heritage",
+      "action": null
+    },
+    {
+      "type": "key_value",
+      "key": "Source",
+      "value": [
+        {
+          "type": "link",
+          "text": "Player Core",
+          "url": "https://2e.aonprd.com/Sources.aspx?ID=216"
+        },
+        {
+          "type": "text",
+          "text": " pg. 43 2.0"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Dwarven heroes of old could shrug off their enemies' magic, and some of that resistance manifests in you. You gain the Call on Ancient Blood reaction."
+        }
+      ]
+    }
+  ]
+}

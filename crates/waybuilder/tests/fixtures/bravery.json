@@ -1,0 +1,103 @@
+{
+  "id": "class-feature-695",
+  "name": "Bravery",
+  "category": "class-feature",
+  "type": "Class Feature",
+  "url": "/Classes.aspx?ID=35",
+  "text": " Bravery Source Player Core pg. 136 2.0 Class Fighter --- Having faced countless foes and the chaos of battle, you have learned how to stand strong in the face of fear. Your proficiency rank for Will saves increases to expert. When you roll a success at a Will save against a fear effect, you get a critical success instead. In addition, anytime you gain the frightened condition, reduce its value by 1.",
+  "markdown": "<title level=\"1\" right=\"Class Feature 3\">[Bravery](/Classes.aspx?ID=35)</title>\r\n\r\n<column gap=\"tiny\">\r\n**Source** [Player Core](/Sources.aspx?ID=216) pg. 136 <sup>2.0</sup>\r\n\r\n**Class** Fighter\r\n</column>\r\n\r\n---\r\n\r\nHaving faced countless foes and the chaos of battle, you have learned how to stand strong in the face of fear. Your proficiency rank for Will saves increases to expert. When you roll a success at a Will save against a [fear](/Traits.aspx?ID=68) effect, you get a critical success instead. In addition, anytime you gain the frightened condition, reduce its value by 1.",
+  "summary": "Having faced countless foes and the chaos of battle, you have learned how to stand strong in the face of fear. Your proficiency rank for Will saves …",
+  "source": [
+    "Player Core"
+  ],
+  "rarity": "common",
+  "trait": [],
+  "trait_group": [],
+  "pfs": null,
+  "level": 3,
+  "tradition": [],
+  "domain": [],
+  "favored_weapon": [],
+  "sanctification": [],
+  "attribute": [],
+  "deity": [],
+  "remaster_id": [],
+  "legacy_id": [
+    "class-7"
+  ],
+  "release_date": "2023-11-15",
+  "skill_mod": {},
+  "search_markdown": "<additional-info>\r\n**Source** [Player Core](/Sources.aspx?ID=216) pg. 136 <sup>2.0</sup>\r\n\r\n**Class** Fighter\r\n</additional-info>\r\n\r\n---\r\n\r\n<summary>\r\nHaving faced countless foes and the chaos of battle, you have learned how to stand strong in the face of fear. Your proficiency rank for Will saves …\r\n</summary>",
+  "source_markdown": "[Player Core](/Sources.aspx?ID=216) pg. 136 <sup>2.0</sup>",
+  "weakness": {},
+  "resistance": {},
+  "primary_source": "Player Core",
+  "primary_source_category": "Rulebooks",
+  "exclude_from_search": false,
+  "summary_markdown": "Having faced countless foes and the chaos of battle, you have learned how to stand strong in the face of fear. Your proficiency rank for Will saves …",
+  "source_category": [
+    "Rulebooks"
+  ],
+  "speed": {},
+  "class": "Fighter",
+  "source_raw": [
+    "Player Core pg. 136"
+  ],
+  "rarity_id": 1,
+  "primary_source_raw": "Player Core pg. 136",
+  "content": [
+    {
+      "type": "title",
+      "level": 1,
+      "text": "Bravery",
+      "right": "Class Feature 3",
+      "action": null
+    },
+    {
+      "type": "key_value",
+      "key": "Source",
+      "value": [
+        {
+          "type": "link",
+          "text": "Player Core",
+          "url": "https://2e.aonprd.com/Sources.aspx?ID=216"
+        },
+        {
+          "type": "text",
+          "text": " pg. 136 2.0"
+        }
+      ]
+    },
+    {
+      "type": "key_value",
+      "key": "Class",
+      "value": [
+        {
+          "type": "text",
+          "text": "Fighter "
+        }
+      ]
+    },
+    {
+      "type": "h_rule"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Having faced countless foes and the chaos of battle, you have learned how to stand strong in the face of fear. Your proficiency rank for Will saves increases to expert. When you roll a success at a Will save against a "
+        },
+        {
+          "type": "link",
+          "text": "fear",
+          "url": "https://2e.aonprd.com/Traits.aspx?ID=68"
+        },
+        {
+          "type": "text",
+          "text": " effect, you get a critical success instead. In addition, anytime you gain the frightened condition, reduce its value by 1."
+        }
+      ]
+    }
+  ]
+}

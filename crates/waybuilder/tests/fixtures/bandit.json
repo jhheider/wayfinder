@@ -1,0 +1,387 @@
+{
+  "success": true,
+  "build": {
+    "name": "Bandit ",
+    "class": "Alchemist",
+    "dualClass": null,
+    "level": 4,
+    "xp": 0,
+    "ancestry": "Awakened Animal",
+    "heritage": "Climbing Animal",
+    "background": "Goblinblood Orphan",
+    "alignment": "N",
+    "gender": "Male",
+    "age": "7",
+    "deity": "Laudinmio",
+    "size": 1,
+    "sizeName": "Small",
+    "keyability": "int",
+    "languages": ["Common", "Draconic", "Dwarven", "Fey", "Goblin"],
+    "rituals": [],
+    "resistances": [],
+    "inventorMods": [],
+    "abilities": {
+      "str": 10,
+      "dex": 16,
+      "con": 10,
+      "int": 18,
+      "wis": 12,
+      "cha": 12,
+      "breakdown": {
+        "ancestryFree": ["Int", "Dex"],
+        "ancestryBoosts": [],
+        "ancestryFlaws": [],
+        "backgroundBoosts": ["Dex", "Int"],
+        "classBoosts": ["Int"],
+        "mapLevelledBoosts": { "1": ["Int", "Dex", "Cha", "Wis"] }
+      }
+    },
+    "attributes": {
+      "ancestryhp": 8,
+      "classhp": 8,
+      "bonushp": 0,
+      "bonushpPerLevel": 0,
+      "speed": 20,
+      "speedBonus": 5
+    },
+    "proficiencies": {
+      "classDC": 2,
+      "perception": 2,
+      "fortitude": 4,
+      "reflex": 4,
+      "will": 2,
+      "heavy": 0,
+      "medium": 2,
+      "light": 2,
+      "unarmored": 2,
+      "advanced": 0,
+      "martial": 0,
+      "simple": 2,
+      "unarmed": 2,
+      "castingArcane": 0,
+      "castingDivine": 0,
+      "castingOccult": 0,
+      "castingPrimal": 2,
+      "acrobatics": 2,
+      "arcana": 2,
+      "athletics": 0,
+      "crafting": 4,
+      "deception": 0,
+      "diplomacy": 2,
+      "intimidation": 0,
+      "medicine": 0,
+      "nature": 2,
+      "occultism": 2,
+      "performance": 0,
+      "religion": 2,
+      "society": 2,
+      "stealth": 2,
+      "survival": 2,
+      "thievery": 2,
+      "piloting": 0,
+      "computers": 0
+    },
+    "mods": {
+      "Crafting": { "Potency Bonus": 1 },
+      "Kineticist Impulse Attack": { "Potency Bonus": 1 }
+    },
+    "feats": [
+      ["Alchemical Crafting", null, "Awarded Feat", 1],
+      ["Assurance", "Survival", "Awarded Feat", 1],
+      [
+        "Climbing Animal",
+        null,
+        "Heritage",
+        1,
+        "Heritage Feat",
+        "standardChoice",
+        null
+      ],
+      [
+        "Far Lobber",
+        null,
+        "Class Feat",
+        1,
+        "Alchemist Feat 1",
+        "standardChoice",
+        null
+      ],
+      [
+        "Awakened Magic",
+        null,
+        "Ancestry Feat",
+        1,
+        "Awakened Animal Feat 1",
+        "standardChoice",
+        null
+      ],
+      [
+        "Trick Magic Item",
+        null,
+        "Skill Feat",
+        2,
+        "Skill Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Quick Bomber",
+        null,
+        "Class Feat",
+        2,
+        "Alchemist Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Rogue Dedication",
+        null,
+        "Archetype Feat",
+        2,
+        "Free Archetype 2",
+        "parentChoice",
+        null
+      ],
+      [
+        "Quick Repair",
+        null,
+        "Skill Feat",
+        2,
+        "Rogue Dedication Skill Feat",
+        "childChoice",
+        "Free Archetype 2"
+      ],
+      [
+        "Fleet",
+        null,
+        "General Feat",
+        3,
+        "General Feat 3",
+        "standardChoice",
+        null
+      ],
+      [
+        "Magical Crafting",
+        null,
+        "Skill Feat",
+        4,
+        "Skill Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Healing Bomb",
+        null,
+        "Class Feat",
+        4,
+        "Alchemist Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Basic Trickery",
+        null,
+        "Archetype Feat",
+        4,
+        "Free Archetype 4",
+        "parentChoice",
+        null
+      ],
+      [
+        "Strong Arm",
+        null,
+        "Rogue Feat",
+        4,
+        "Basic TrickeryFree Archetype 4",
+        "childChoice",
+        "Free Archetype 4"
+      ]
+    ],
+    "specials": [
+      "Alchemy",
+      "Formula Book",
+      "Advanced Alchemy",
+      "Versatile Vials",
+      "Quick Alchemy",
+      "Bomber",
+      "Formulas (Bomber)",
+      "Field Benefit (Bomber)",
+      "Field Vials (Bomber)",
+      "Small",
+      "Surprise Attack",
+      "Crafting",
+      "Climbing Animal"
+    ],
+    "lores": [["Goblin", 2]],
+    "equipmentContainers": {
+      "8cf108b0-7e99-499a-a163-2766e5732a74": {
+        "containerName": "Backpack",
+        "bagOfHolding": false,
+        "backpack": true,
+        "augmentations": false
+      }
+    },
+    "equipment": [
+      ["Backpack", 1, "Invested"],
+      ["Bedroll", 1, "8cf108b0-7e99-499a-a163-2766e5732a74", "Invested"],
+      ["Chalk", 10, "8cf108b0-7e99-499a-a163-2766e5732a74", "Invested"],
+      [
+        "Flint and Steel",
+        1,
+        "8cf108b0-7e99-499a-a163-2766e5732a74",
+        "Invested"
+      ],
+      ["Rope", 1, "8cf108b0-7e99-499a-a163-2766e5732a74", "Invested"],
+      ["Rations", 2, "8cf108b0-7e99-499a-a163-2766e5732a74", "Invested"],
+      ["Torch", 5, "8cf108b0-7e99-499a-a163-2766e5732a74", "Invested"],
+      ["Waterskin", 1, "8cf108b0-7e99-499a-a163-2766e5732a74", "Invested"],
+      ["Soap", 1, "8cf108b0-7e99-499a-a163-2766e5732a74", "Invested"],
+      ["Alchemist's Toolkit", 1, "Invested"],
+      [
+        "Thieves' Toolkit",
+        2,
+        "8cf108b0-7e99-499a-a163-2766e5732a74",
+        "Invested"
+      ],
+      ["Bomb Launcher", 1, "Invested"],
+      ["Everlight Crystal", 1, "Invested"],
+      ["Repair Kit", 1, "8cf108b0-7e99-499a-a163-2766e5732a74", "Invested"],
+      [
+        "Thieves' Toolkit (Replacement Picks)",
+        3,
+        "8cf108b0-7e99-499a-a163-2766e5732a74",
+        "Invested"
+      ]
+    ],
+    "specificProficiencies": {
+      "trained": ["Alchemical Bomb"],
+      "expert": [],
+      "master": [],
+      "legendary": []
+    },
+    "weapons": [
+      {
+        "name": "Special Unarmed (1d6)",
+        "qty": 1,
+        "prof": "unarmed",
+        "die": "d6",
+        "pot": 1,
+        "str": "striking",
+        "mat": null,
+        "display": "Jaws",
+        "runes": [],
+        "damageType": "B, P or S",
+        "attack": 10,
+        "damageBonus": 0,
+        "extraDamage": [],
+        "increasedDice": false,
+        "isInventor": false
+      },
+      {
+        "name": "Alchemical Crossbow",
+        "qty": 1,
+        "prof": "simple",
+        "die": "d8",
+        "pot": 1,
+        "str": "striking",
+        "mat": null,
+        "display": "+1 Striking Alchemical Crossbow",
+        "runes": [],
+        "damageType": "P",
+        "attack": 10,
+        "damageBonus": 0,
+        "extraDamage": [],
+        "increasedDice": false,
+        "isInventor": false
+      },
+      {
+        "name": "Alchemical Bomb",
+        "qty": 1,
+        "prof": "martial",
+        "die": "d0",
+        "pot": 1,
+        "str": "striking",
+        "mat": null,
+        "display": "+1 Striking Alchemical Bomb",
+        "runes": [],
+        "damageType": "Varies",
+        "attack": 10,
+        "damageBonus": 0,
+        "extraDamage": [],
+        "increasedDice": false,
+        "isInventor": false
+      }
+    ],
+    "money": { "cp": 0, "sp": 5, "gp": 63, "pp": 0 },
+    "armor": [
+      {
+        "name": "Kilted Breastplate",
+        "qty": 1,
+        "prof": "light",
+        "pot": 0,
+        "res": "",
+        "mat": null,
+        "display": "Kilted Breastplate",
+        "worn": true,
+        "runes": []
+      }
+    ],
+    "spellCasters": [
+      {
+        "name": "Awakened Magic",
+        "magicTradition": "primal",
+        "spellcastingType": "prepared",
+        "ability": "cha",
+        "proficiency": 2,
+        "focusPoints": 0,
+        "innate": true,
+        "perDay": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "spells": [{ "spellLevel": 0, "list": ["Slashing Gust"] }],
+        "prepared": [],
+        "blendedSpells": []
+      }
+    ],
+    "focusPoints": 0,
+    "focus": {},
+    "formula": [
+      {
+        "type": "Alchemist",
+        "known": [
+          "Nail Bomb (Moderate)",
+          "Skunk Bomb (Moderate)",
+          "Necrotic Bomb (Moderate)",
+          "Versatile Vial (Moderate)",
+          "Elixir of Life (Minor)",
+          "Fury Cocktail (Lesser)",
+          "Energy Mutagen (Moderate)",
+          "Frost Vial (Moderate)",
+          "Dread Ampoule (Moderate)",
+          "Acid Flask (Moderate)",
+          "Bottled Lightning (Moderate)",
+          "Alchemist's Fire (Moderate)",
+          "Glue Bomb (Moderate)",
+          "Ghost Charge (Moderate)",
+          "Sticky Algae Bomb (Moderate)"
+        ]
+      },
+      {
+        "type": "other",
+        "known": [
+          "Weapon Potency +1",
+          "Cantrip Deck (5-Pack)",
+          "Everlight Crystal",
+          "Masquerade Scarf"
+        ]
+      }
+    ],
+    "acTotal": {
+      "acProfBonus": 6,
+      "acAbilityBonus": 3,
+      "acItemBonus": 2,
+      "acTotal": 21,
+      "shieldBonus": null
+    },
+    "pets": [],
+    "familiars": []
+  }
+}

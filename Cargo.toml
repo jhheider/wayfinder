@@ -1,0 +1,24 @@
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[workspace.dependencies]
+wayfinder-core = { path = "crates/wayfinder-core" }
+reqwest = { version = "0.13.1", default-features = false, features = ["json", "rustls"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+tokio = { version = "1.49.0", features = ["full"] }
+rusqlite = { version = "0.38.0", features = ["bundled"] }
+clap = { version = "4.5.55", features = ["derive"] }
+ratatui = "0.30.0"
+crossterm = "0.29.0"
+anyhow = "1.0.100"
+colored = "3.1.1"
+dirs = "6.0.0"
+html-escape = "0.2.13"
+indexmap = "2"

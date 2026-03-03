@@ -1,0 +1,8 @@
+# Tarpaulin configuration
+[default]
+workspace = true
+engine = "Llvm"
+all-features = true
+exclude-files = ["wayfinder/tests/*", "wayfinder-core/tests/*"]
+output-dir = "coverage"
+out = ["Lcov", "Html"]

@@ -1,0 +1,557 @@
+{
+  "id": "ancestry-59",
+  "name": "Dwarf",
+  "category": "ancestry",
+  "type": "Ancestry",
+  "url": "/Ancestries.aspx?ID=59",
+  "text": " Dwarf Source Player Core pg. 42 2.0 Dwarves are a short, stocky people who are often stubborn, fierce, and devoted. Dwarves have a well-earned reputation as a stoic and stern people, but they also have an unbridled zeal and deeply value artisanship. To a stranger, they can seem untrusting and clannish, but to their friends and family, they are warm and caring. While trust from a dwarf is hard-won, once gained it is as strong as iron. If you want to play a character who is as hard as nails, a stubborn and unrelenting adventurer, with a mix of rugged toughness and deep wisdom, you should play a dwarf. You Might... Strive to uphold your personal honor and refuse to back down Appreciate quality craftsmanship in all forms and insist upon it for all your gear. Others Probably... See you as stubborn, though whether this is an asset or a detriment changes from moment to moment. Recognize the deep connection you have with your family, heritage, and friends. Physical Description Dwarves are short and stocky, standing about a foot shorter than most humans. They have wide, compact bodies and burly frames. Dwarves of all genders pride themselves on the length of their hair and beards, which they often braid into intricate patterns, some of which represent specific clans. A long beard is a sign of maturity and honor among many dwarf clans. Dwarves typically reach physical adulthood around the age of 25, though their traditionalist culture places more value on completing coming-of-age ceremonies unique to each clan than reaching a certain age. A typical dwarf can live to around 350 years old. Society Though the ancient dwarven empire fell long ago, overwhelmed by orc and goblinoid enemies, dwarves today retain many of the qualities that once propelled them to greatness: fierceness, gumption, and stubbornness in their endeavors. Dwarves live within mountain Sky Citadels dotted over the surface, which can create vast cultural divides between dwarf clans. Yet nearly all dwarven peoples share a passion for stonework, metalwork, and family. Few dwarves are seen without their clan dagger strapped to their belt. This dagger is forged just before a dwarf's birth and is distinctive to their clan. Dwarves honor their children with names of ancestors or dwarven heroes. When introducing themselves, dwarves tend to list their family and clan, plus any number of other familial connections and honorifics. Alignment and Religion Dwarves tend to value honor and closely follow the traditions of their clans and kingdoms. They have a strong sense of friendship and justice, though they are often very particular about who they consider a friend. They work hard and play harder—especially when strong ale is involved. Torag, god of dwarvenkind, is dwarves' primary deity, though worship of Torag's family members is also common. Popular Edicts create art with utility, guard your community against those who would harm it, keep your clan dagger close Popular Anathema leave an activity or promise uncompleted, forsake your family Names Agna, Bodill, Edrukk, Grunyar, Ingra, Kotri, Morgrym, Rogar, Torra, Yangrit Dwarf Mechanics Hit Points 10 Size Medium Speed 20 feet Attribute Boosts Constitution, Wisdom, Free Attribute Flaws Charisma Languages Common Dwarven Additional languages equal to your Intelligence modifier (if it's positive). Choose from Gnomish, Goblin, Jotun, Orcish, Petran, Sakvroth, and any other languages to which you have access (such as the languages prevalent in your region). Darkvision You can see in darkness and dim light just as well as you can see in bright light, though your vision in darkness is in black and white. Clan Dagger You get one clan dagger for free, as it was given to you at birth. Selling this clan dagger is a terrible taboo and earns you the disdain of other dwarves.",
+  "markdown": "<title level=\"1\" right=\"Ancestry\" pfs=\"\">[Dwarf](/Ancestries.aspx?ID=59)</title>\r\n\r\n<row gap=\"medium\">\r\n<column gap=\"medium\" flex=\"1 1 400px\">\r\n\r\n<traits>\r\n<trait label=\"Dwarf\" url=\"/Traits.aspx?ID=584\" />\r\n<trait label=\"Humanoid\" url=\"/Traits.aspx?ID=628\" />\r\n</traits>\r\n\r\n**Source** [Player Core](/Sources.aspx?ID=216) pg. 42 <sup>2.0</sup>\n\n_Dwarves are a short, stocky people who are often stubborn, fierce, and devoted._\r\n\r\nDwarves have a well-earned reputation as a stoic and stern people, but they also have an unbridled zeal and deeply value artisanship. To a stranger, they can seem untrusting and clannish, but to their friends and family, they are warm and caring. While trust from a dwarf is hard-won, once gained it is as strong as iron.\n\n If you want to play a character who is as hard as nails, a stubborn and unrelenting adventurer, with a mix of rugged toughness and deep wisdom, you should play a dwarf.\r\n\r\n</column>\r\n\r\n<column gap=\"medium\">\r\n<image src=\"/images/Ancestries/Dwarf01.png\" />\r\n<image src=\"/images/Ancestries/Dwarf02.png\" />\r\n</column>\r\n</row>\r\n\r\n<title level=\"2\">You Might...</title>\r\n\n<ul><li>Strive to uphold your personal honor and refuse to back down</li><li>Appreciate quality craftsmanship in all forms and insist upon it for all your gear.</li></ul>\r\n\r\n<title level=\"2\">Others Probably...</title>\r\n\n<ul><li>See you as stubborn, though whether this is an asset or a detriment changes from moment to moment.</li><li>Recognize the deep connection you have with your family, heritage, and friends.</li></ul>\r\n\r\n<title level=\"2\">Physical Description</title>\r\nDwarves are short and stocky, standing about a foot shorter than most humans. They have wide, compact bodies and burly frames. Dwarves of all genders pride themselves on the length of their hair and beards, which they often braid into intricate patterns, some of which represent specific clans. A long beard is a sign of maturity and honor among many dwarf clans.\n\n Dwarves typically reach physical adulthood around the age of 25, though their traditionalist culture places more value on completing coming-of-age ceremonies unique to each clan than reaching a certain age. A typical dwarf can live to around 350 years old.\r\n\r\n<title level=\"2\">Society</title>\r\nThough the ancient dwarven empire fell long ago, overwhelmed by orc and goblinoid enemies, dwarves today retain many of the qualities that once propelled them to greatness: fierceness, gumption, and stubbornness in their endeavors. Dwarves live within mountain Sky Citadels dotted over the surface, which can create vast cultural divides between dwarf clans. Yet nearly all dwarven peoples share a passion for stonework, metalwork, and family.\n\n Few dwarves are seen without their [clan dagger](/Weapons.aspx?ID=13) strapped to their belt. This dagger is forged just before a dwarf's birth and is distinctive to their clan. Dwarves honor their children with names of ancestors or dwarven heroes. When introducing themselves, dwarves tend to list their family and clan, plus any number of other familial connections and honorifics.\r\n\r\n<title level=\"2\">Alignment and Religion</title>\r\nDwarves tend to value honor and closely follow the traditions of their clans and kingdoms. They have a strong sense of friendship and justice, though they are often very particular about who they consider a friend. They work hard and play harder—especially when strong ale is involved. [Torag](/Deities.aspx?ID=18), god of dwarvenkind, is dwarves' primary deity, though worship of Torag's family members is also common.\n\n **Popular Edicts** create art with utility, guard your community against those who would harm it, keep your clan dagger close<br /> **Popular Anathema** leave an activity or promise uncompleted, forsake your family\n\n<title level=\"2\">Names</title>\r\nAgna, Bodill, Edrukk, Grunyar, Ingra, Kotri, Morgrym, Rogar, Torra, Yangrit\n<title level=\"2\">Dwarf Mechanics</title>\r\n\r\n<title level=\"3\">Hit Points</title>\r\n10\r\n\r\n<title level=\"3\">Size</title>\r\nMedium\r\n\r\n<title level=\"3\">Speed</title>\r\n20 feet\r\n\r\n<title level=\"3\">Attribute Boosts</title>\r\nConstitution, Wisdom, Free\r\n\r\n<title level=\"3\">Attribute Flaws</title>\r\nCharisma\r\n\r\n<title level=\"3\">Languages</title>\r\n<column gap=\"tiny\">\r\n[Common](/Languages.aspx?ID=1)\r\n\r\n[Dwarven](/Languages.aspx?ID=3)\r\n\r\nAdditional languages equal to your Intelligence modifier (if it's positive). Choose from [Gnomish](/Languages.aspx?ID=5), [Goblin](/Languages.aspx?ID=6), [Jotun](/Languages.aspx?ID=8), [Orcish](/Languages.aspx?ID=9), [Petran](/Languages.aspx?ID=109), [Sakvroth](/Languages.aspx?ID=118), and any other languages to which you have access (such as the languages prevalent in your region).\r\n</column>\r\n\r\n<title level=\"3\">[Darkvision](/Rules.aspx?ID=415)</title>\r\nYou can see in darkness and dim light just as well as you can see in bright light, though your vision in darkness is in black and white.\r\n\r\n<title level=\"3\">Clan Dagger</title>\r\nYou get one [clan dagger](/Weapons.aspx?ID=13) for free, as it was given to you at birth. Selling this clan dagger is a terrible taboo and earns you the disdain of other dwarves.",
+  "summary": "Dwarves are a short, stocky people who are often stubborn, fierce, and devoted.",
+  "source": [
+    "Player Core"
+  ],
+  "rarity": "common",
+  "trait": [
+    "Dwarf",
+    "Humanoid"
+  ],
+  "trait_group": [
+    "Ancestry",
+    "Weapon",
+    "Creature Type"
+  ],
+  "pfs": null,
+  "level": null,
+  "tradition": [],
+  "domain": [],
+  "favored_weapon": [],
+  "sanctification": [],
+  "attribute": [
+    "Constitution",
+    "Wisdom",
+    "Free"
+  ],
+  "deity": [],
+  "remaster_id": [],
+  "legacy_id": [
+    "ancestry-1"
+  ],
+  "weakness": {},
+  "language_markdown": "[Common](/Languages.aspx?ID=1), [Dwarven](/Languages.aspx?ID=3)",
+  "source_raw": [
+    "Player Core pg. 42"
+  ],
+  "primary_source_category": "Rulebooks",
+  "size_id": [
+    3
+  ],
+  "speed_raw": "20 feet",
+  "exclude_from_search": false,
+  "hp_raw": "10",
+  "release_date": "2023-11-15",
+  "language": [
+    "Common",
+    "Dwarven"
+  ],
+  "trait_raw": [
+    "Dwarf",
+    "Humanoid"
+  ],
+  "trait_markdown": "[Dwarf](/Traits.aspx?ID=584), [Humanoid](/Traits.aspx?ID=628)",
+  "size": [
+    "Medium"
+  ],
+  "navigation": [
+    {
+      "label": "Details",
+      "url": "/Ancestries.aspx?ID=59"
+    },
+    {
+      "label": "Feats",
+      "url": "/Ancestries.aspx?ID=59/feats"
+    },
+    {
+      "label": "Heritages",
+      "url": "/Ancestries.aspx?ID=59/heritages"
+    }
+  ],
+  "speed_markdown": "20 feet",
+  "primary_source_raw": "Player Core pg. 42",
+  "attribute_flaw": [
+    "Charisma"
+  ],
+  "primary_source": "Player Core",
+  "summary_markdown": "Dwarves are a short, stocky people who are often stubborn, fierce, and devoted.",
+  "resistance": {},
+  "source_category": [
+    "Rulebooks"
+  ],
+  "vision": "Darkvision",
+  "hp": 10,
+  "source_markdown": "[Player Core](/Sources.aspx?ID=216) pg. 42 <sup>2.0</sup>",
+  "image": [
+    "/Images/Ancestries/Dwarf01.png",
+    "/Images/Ancestries/Dwarf02.png"
+  ],
+  "search_markdown": "<traits>\r\n<trait label=\"Dwarf\" url=\"/Traits.aspx?ID=584\" />\r\n<trait label=\"Humanoid\" url=\"/Traits.aspx?ID=628\" />\r\n</traits>\r\n\r\n<additional-info>\r\n**Source** [Player Core](/Sources.aspx?ID=216) pg. 42 <sup>2.0</sup>\r\n\r\n<row gap=\"medium\">\r\n**Hit Points**\r\n10\r\n\r\n**Size**\r\nMedium\r\n\r\n**Speed**\r\n20 feet\r\n</row>\r\n\r\n**Attribute Boosts**\r\nConstitution, Wisdom, Free\r\n\r\n**Attribute Flaw**\r\nCharisma\r\n</additional-info>\r\n\r\n---\r\n\r\n<summary>\r\nDwarves are a short, stocky people who are often stubborn, fierce, and devoted.\r\n</summary>",
+  "skill_mod": {},
+  "speed": {
+    "land": 20,
+    "max": 20
+  },
+  "rarity_id": 1,
+  "content": [
+    {
+      "type": "title",
+      "level": 1,
+      "text": "Dwarf",
+      "right": "Ancestry",
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "trait",
+          "label": "Dwarf"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "trait",
+          "label": "Humanoid"
+        }
+      ]
+    },
+    {
+      "type": "key_value",
+      "key": "Source",
+      "value": [
+        {
+          "type": "link",
+          "text": "Player Core",
+          "url": "https://2e.aonprd.com/Sources.aspx?ID=216"
+        },
+        {
+          "type": "text",
+          "text": " pg. 42 2.0"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "italic",
+          "text": "Dwarves are a short, stocky people who are often stubborn, fierce, and devoted."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Dwarves have a well-earned reputation as a stoic and stern people, but they also have an unbridled zeal and deeply value artisanship. To a stranger, they can seem untrusting and clannish, but to their friends and family, they are warm and caring. While trust from a dwarf is hard-won, once gained it is as strong as iron."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": " If you want to play a character who is as hard as nails, a stubborn and unrelenting adventurer, with a mix of rugged toughness and deep wisdom, you should play a dwarf."
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 2,
+      "text": "You Might...",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "list",
+      "items": [
+        [
+          {
+            "type": "text",
+            "text": "Strive to uphold your personal honor and refuse to back down"
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "Appreciate quality craftsmanship in all forms and insist upon it for all your gear."
+          }
+        ]
+      ]
+    },
+    {
+      "type": "title",
+      "level": 2,
+      "text": "Others Probably...",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "list",
+      "items": [
+        [
+          {
+            "type": "text",
+            "text": "See you as stubborn, though whether this is an asset or a detriment changes from moment to moment."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "Recognize the deep connection you have with your family, heritage, and friends."
+          }
+        ]
+      ]
+    },
+    {
+      "type": "title",
+      "level": 2,
+      "text": "Physical Description",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Dwarves are short and stocky, standing about a foot shorter than most humans. They have wide, compact bodies and burly frames. Dwarves of all genders pride themselves on the length of their hair and beards, which they often braid into intricate patterns, some of which represent specific clans. A long beard is a sign of maturity and honor among many dwarf clans."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": " Dwarves typically reach physical adulthood around the age of 25, though their traditionalist culture places more value on completing coming-of-age ceremonies unique to each clan than reaching a certain age. A typical dwarf can live to around 350 years old."
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 2,
+      "text": "Society",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Though the ancient dwarven empire fell long ago, overwhelmed by orc and goblinoid enemies, dwarves today retain many of the qualities that once propelled them to greatness: fierceness, gumption, and stubbornness in their endeavors. Dwarves live within mountain Sky Citadels dotted over the surface, which can create vast cultural divides between dwarf clans. Yet nearly all dwarven peoples share a passion for stonework, metalwork, and family."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": " Few dwarves are seen without their "
+        },
+        {
+          "type": "link",
+          "text": "clan dagger",
+          "url": "https://2e.aonprd.com/Weapons.aspx?ID=13"
+        },
+        {
+          "type": "text",
+          "text": " strapped to their belt. This dagger is forged just before a dwarf's birth and is distinctive to their clan. Dwarves honor their children with names of ancestors or dwarven heroes. When introducing themselves, dwarves tend to list their family and clan, plus any number of other familial connections and honorifics."
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 2,
+      "text": "Alignment and Religion",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Dwarves tend to value honor and closely follow the traditions of their clans and kingdoms. They have a strong sense of friendship and justice, though they are often very particular about who they consider a friend. They work hard and play harder—especially when strong ale is involved. "
+        },
+        {
+          "type": "link",
+          "text": "Torag",
+          "url": "https://2e.aonprd.com/Deities.aspx?ID=18"
+        },
+        {
+          "type": "text",
+          "text": ", god of dwarvenkind, is dwarves' primary deity, though worship of Torag's family members is also common."
+        }
+      ]
+    },
+    {
+      "type": "key_value",
+      "key": "Popular Edicts",
+      "value": [
+        {
+          "type": "text",
+          "text": "create art with utility, guard your community against those who would harm it, keep your clan dagger close"
+        }
+      ]
+    },
+    {
+      "type": "key_value",
+      "key": "Popular Anathema",
+      "value": [
+        {
+          "type": "text",
+          "text": "leave an activity or promise uncompleted, forsake your family"
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 2,
+      "text": "Names",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Agna, Bodill, Edrukk, Grunyar, Ingra, Kotri, Morgrym, Rogar, Torra, Yangrit "
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 2,
+      "text": "Dwarf Mechanics",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "title",
+      "level": 3,
+      "text": "Hit Points",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "10"
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 3,
+      "text": "Size",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Medium"
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 3,
+      "text": "Speed",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "20 feet"
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 3,
+      "text": "Attribute Boosts",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Constitution, Wisdom, Free"
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 3,
+      "text": "Attribute Flaws",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Charisma"
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 3,
+      "text": "Languages",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "link",
+          "text": "Common",
+          "url": "https://2e.aonprd.com/Languages.aspx?ID=1"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "link",
+          "text": "Dwarven",
+          "url": "https://2e.aonprd.com/Languages.aspx?ID=3"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Additional languages equal to your Intelligence modifier (if it's positive). Choose from "
+        },
+        {
+          "type": "link",
+          "text": "Gnomish",
+          "url": "https://2e.aonprd.com/Languages.aspx?ID=5"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "link",
+          "text": "Goblin",
+          "url": "https://2e.aonprd.com/Languages.aspx?ID=6"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "link",
+          "text": "Jotun",
+          "url": "https://2e.aonprd.com/Languages.aspx?ID=8"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "link",
+          "text": "Orcish",
+          "url": "https://2e.aonprd.com/Languages.aspx?ID=9"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "link",
+          "text": "Petran",
+          "url": "https://2e.aonprd.com/Languages.aspx?ID=109"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "link",
+          "text": "Sakvroth",
+          "url": "https://2e.aonprd.com/Languages.aspx?ID=118"
+        },
+        {
+          "type": "text",
+          "text": ", and any other languages to which you have access (such as the languages prevalent in your region). "
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 3,
+      "text": "Darkvision",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "You can see in darkness and dim light just as well as you can see in bright light, though your vision in darkness is in black and white."
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "level": 3,
+      "text": "Clan Dagger",
+      "right": null,
+      "action": null
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "You get one "
+        },
+        {
+          "type": "link",
+          "text": "clan dagger",
+          "url": "https://2e.aonprd.com/Weapons.aspx?ID=13"
+        },
+        {
+          "type": "text",
+          "text": " for free, as it was given to you at birth. Selling this clan dagger is a terrible taboo and earns you the disdain of other dwarves."
+        }
+      ]
+    }
+  ]
+}
