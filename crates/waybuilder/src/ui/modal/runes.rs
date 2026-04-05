@@ -83,7 +83,11 @@ impl RuneModal {
     pub fn cycle_right(&mut self) {
         match self.fields[self.cursor] {
             RuneField::Potency => {
-                self.potency = if self.potency >= 3 { 0 } else { self.potency + 1 };
+                self.potency = if self.potency >= 3 {
+                    0
+                } else {
+                    self.potency + 1
+                };
             }
             RuneField::Striking => {
                 self.striking = self.striking.next();
@@ -97,7 +101,11 @@ impl RuneModal {
     pub fn cycle_left(&mut self) {
         match self.fields[self.cursor] {
             RuneField::Potency => {
-                self.potency = if self.potency == 0 { 3 } else { self.potency - 1 };
+                self.potency = if self.potency == 0 {
+                    3
+                } else {
+                    self.potency - 1
+                };
             }
             RuneField::Striking => {
                 self.striking = self.striking.prev();
@@ -127,11 +135,19 @@ impl RuneModal {
             }
             RuneField::Striking => {
                 let l = self.striking.label();
-                if l.is_empty() { "None".to_string() } else { l.to_string() }
+                if l.is_empty() {
+                    "None".to_string()
+                } else {
+                    l.to_string()
+                }
             }
             RuneField::Resilient => {
                 let l = self.resilient.label();
-                if l.is_empty() { "None".to_string() } else { l.to_string() }
+                if l.is_empty() {
+                    "None".to_string()
+                } else {
+                    l.to_string()
+                }
             }
         }
     }

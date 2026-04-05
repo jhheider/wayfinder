@@ -136,9 +136,7 @@ fn recalculate_deity(ch: &mut Character, choices: &BuildChoices) {
         .class
         .as_deref()
         .is_some_and(|c| c.eq_ignore_ascii_case("cleric"));
-    if is_cleric
-        && let Some(skill) = &deity_data.divine_skill
-    {
+    if is_cleric && let Some(skill) = &deity_data.divine_skill {
         ch.proficiencies.train_skill(skill, Rank::Trained);
     }
 }
@@ -188,8 +186,7 @@ fn recalculate_spells(ch: &mut Character, choices: &BuildChoices) {
         .unwrap_or(Ability::Intelligence);
     let spell_rank = Rank::Trained;
     let level = ch.level;
-    ch.spell_attack =
-        ch.abilities.modifier(casting_ability) + spell_rank.bonus() + level as i32;
+    ch.spell_attack = ch.abilities.modifier(casting_ability) + spell_rank.bonus() + level as i32;
     ch.spell_dc = 10 + ch.spell_attack;
 }
 
@@ -212,7 +209,14 @@ fn recalculate_combat(ch: &mut Character, choices: &BuildChoices) {
         }
         None => (0, None, ch.proficiencies.unarmored, 0, Default::default()),
     };
-    ch.ac = combat::compute_ac(&ch.abilities, armor_rank, level, ac_bonus, dex_cap, armor_potency);
+    ch.ac = combat::compute_ac(
+        &ch.abilities,
+        armor_rank,
+        level,
+        ac_bonus,
+        dex_cap,
+        armor_potency,
+    );
 
     // Shield AC bonus (when raised)
     ch.shield_ac_bonus = eq
@@ -239,12 +243,9 @@ fn recalculate_combat(ch: &mut Character, choices: &BuildChoices) {
         ch.proficiencies.reflex,
         level,
     ) + res_bonus;
-    ch.will_bonus = combat::compute_save(
-        &ch.abilities,
-        Ability::Wisdom,
-        ch.proficiencies.will,
-        level,
-    ) + res_bonus;
+    ch.will_bonus =
+        combat::compute_save(&ch.abilities, Ability::Wisdom, ch.proficiencies.will, level)
+            + res_bonus;
 
     // Class DC
     let key = ch
@@ -279,10 +280,7 @@ fn recalculate_combat(ch: &mut Character, choices: &BuildChoices) {
         .collect();
 }
 
-fn armor_prof_rank(
-    category: &str,
-    profs: &crate::model::proficiencies::Proficiencies,
-) -> Rank {
+fn armor_prof_rank(category: &str, profs: &crate::model::proficiencies::Proficiencies) -> Rank {
     match category.to_lowercase().as_str() {
         "light" => profs.light_armor,
         "medium" => profs.medium_armor,
@@ -291,10 +289,7 @@ fn armor_prof_rank(
     }
 }
 
-fn weapon_prof_rank(
-    category: &str,
-    profs: &crate::model::proficiencies::Proficiencies,
-) -> Rank {
+fn weapon_prof_rank(category: &str, profs: &crate::model::proficiencies::Proficiencies) -> Rank {
     match category.to_lowercase().as_str() {
         "simple" => profs.simple_weapons,
         "martial" => profs.martial_weapons,
@@ -303,10 +298,7 @@ fn weapon_prof_rank(
     }
 }
 
-fn compute_weapon_attack(
-    weapon: &crate::model::equipment::Weapon,
-    ch: &Character,
-) -> WeaponAttack {
+fn compute_weapon_attack(weapon: &crate::model::equipment::Weapon, ch: &Character) -> WeaponAttack {
     let is_ranged = weapon.is_ranged();
     let is_finesse = weapon.has_trait("Finesse");
 
@@ -321,8 +313,7 @@ fn compute_weapon_attack(
     };
 
     let prof_rank = weapon_prof_rank(&weapon.weapon_category, &ch.proficiencies);
-    let attack_bonus =
-        ability_mod + prof_rank.bonus() + ch.level as i32 + weapon.potency as i32;
+    let attack_bonus = ability_mod + prof_rank.bonus() + ch.level as i32 + weapon.potency as i32;
 
     let num_dice = 1 + weapon.striking.extra_dice();
     let die = weapon.damage_die_str();
@@ -341,10 +332,7 @@ fn compute_weapon_attack(
     }
 }
 
-fn apply_class_proficiencies(
-    ch: &mut Character,
-    data: &crate::build::choices::ClassData,
-) {
+fn apply_class_proficiencies(ch: &mut Character, data: &crate::build::choices::ClassData) {
     ch.proficiencies.perception = data.perception;
     ch.proficiencies.fortitude = data.fortitude;
     ch.proficiencies.reflex = data.reflex;

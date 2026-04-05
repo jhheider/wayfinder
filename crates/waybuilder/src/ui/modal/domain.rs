@@ -70,10 +70,7 @@ pub fn render(f: &mut Frame, modal: &DomainModal) {
             Style::default().fg(Color::White)
         };
         let marker = if is_cursor { "▸ " } else { "  " };
-        lines.push(Line::from(Span::styled(
-            format!("{marker}{item}"),
-            style,
-        )));
+        lines.push(Line::from(Span::styled(format!("{marker}{item}"), style)));
     }
 
     f.render_widget(Paragraph::new(lines), inner);

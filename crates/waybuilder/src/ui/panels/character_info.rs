@@ -21,7 +21,13 @@ pub fn render(f: &mut Frame, area: Rect, app: &App) {
         .border_style(border_style);
 
     let ch = &app.character;
-    let sign = |v: i32| if v >= 0 { format!("+{v}") } else { format!("{v}") };
+    let sign = |v: i32| {
+        if v >= 0 {
+            format!("+{v}")
+        } else {
+            format!("{v}")
+        }
+    };
 
     let mut lines = vec![
         Line::from(Span::styled(
@@ -47,8 +53,7 @@ pub fn render(f: &mut Frame, area: Rect, app: &App) {
                 )];
                 for (i, d) in deity_data.domains.iter().enumerate() {
                     if i > 0 {
-                        domain_spans
-                            .push(Span::styled(", ", Style::default().fg(Color::DarkGray)));
+                        domain_spans.push(Span::styled(", ", Style::default().fg(Color::DarkGray)));
                     }
                     let is_primary = deity_data.primary_domains.contains(d);
                     let style = if is_primary {
@@ -98,7 +103,10 @@ pub fn render(f: &mut Frame, area: Rect, app: &App) {
                 .fg(Color::Green)
                 .add_modifier(Modifier::BOLD),
         ),
-        Span::styled(format!("Speed {} ", ch.speed), Style::default().fg(Color::Cyan)),
+        Span::styled(
+            format!("Speed {} ", ch.speed),
+            Style::default().fg(Color::Cyan),
+        ),
         Span::styled(format!("Size {size}"), Style::default().fg(Color::Gray)),
     ]));
 
@@ -106,7 +114,9 @@ pub fn render(f: &mut Frame, area: Rect, app: &App) {
 
     // Abilities: header row + modifier row
     let label_style = Style::default().fg(Color::Gray);
-    let val_style = Style::default().fg(Color::White).add_modifier(Modifier::BOLD);
+    let val_style = Style::default()
+        .fg(Color::White)
+        .add_modifier(Modifier::BOLD);
 
     let header: Vec<Span> = Ability::ALL
         .iter()

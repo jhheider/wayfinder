@@ -366,9 +366,7 @@ pub fn sync_progression(
                 let slot_key = format!("{}_{}", state.slot.label(), state.level);
                 choices.feats.get(&slot_key).map(|f| f.name.clone())
             }
-            BuildSlot::SkillIncrease => {
-                choices.skill_increases.get(&state.level).cloned()
-            }
+            BuildSlot::SkillIncrease => choices.skill_increases.get(&state.level).cloned(),
             // ClassFeature slots are pre-filled by build_progression_with_class
             BuildSlot::ClassFeature => state.filled.clone(),
             BuildSlot::SkillSelection => {

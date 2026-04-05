@@ -17,10 +17,7 @@ pub struct SkillModal {
 
 impl SkillModal {
     /// Create a skill selection modal for initial L1 skill picks (select untrained skills).
-    pub fn new_selection(
-        skills: &[(String, Rank)],
-        already_selected: &[String],
-    ) -> Self {
+    pub fn new_selection(skills: &[(String, Rank)], already_selected: &[String]) -> Self {
         let skill_entries: Vec<(String, Rank, bool)> = SKILLS
             .iter()
             .map(|&s| {

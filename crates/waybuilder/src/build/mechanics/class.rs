@@ -16,11 +16,7 @@ use super::subclass::subclass_category;
 
 /// Extract class HP, key ability, proficiencies, and granted skills.
 pub fn extract_class_data(doc: &Document) -> ClassData {
-    let hp = doc
-        .extra
-        .get("hp")
-        .and_then(|v| v.as_u64())
-        .unwrap_or(0) as u32;
+    let hp = doc.extra.get("hp").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
     let key_ability = doc.attribute.first().cloned();
 
     // Class key ability boost spec
@@ -175,10 +171,7 @@ fn parse_feature_table_rows(rows: &[Vec<String>]) -> Vec<ClassFeatureEntry> {
     features
 }
 
-fn parse_spell_table(
-    headers: &[String],
-    rows: &[Vec<String>],
-) -> Vec<Vec<String>> {
+fn parse_spell_table(headers: &[String], rows: &[Vec<String>]) -> Vec<Vec<String>> {
     // Headers: ["Your Level", "Cantrips", "1st", "2nd", ...]
     // Rows: ["1", "5", "2", "—", ...] per level
     // Return: one vec per level, containing slot strings

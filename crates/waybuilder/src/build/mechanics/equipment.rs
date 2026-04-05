@@ -49,10 +49,7 @@ pub fn extract_weapon(doc: &Document) -> Weapon {
                 .collect()
         })
         .unwrap_or_default();
-    let range = extra
-        .get("range")
-        .and_then(|v| v.as_u64())
-        .unwrap_or(0) as u32;
+    let range = extra.get("range").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
 
     Weapon {
         name,
@@ -75,10 +72,7 @@ pub fn extract_weapon(doc: &Document) -> Weapon {
 pub fn extract_armor(doc: &Document) -> Armor {
     let extra = &doc.extra;
     let name = doc.name.clone().unwrap_or_default();
-    let ac_bonus = extra
-        .get("ac")
-        .and_then(|v| v.as_i64())
-        .unwrap_or(0) as i32;
+    let ac_bonus = extra.get("ac").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
     let dex_cap = extra
         .get("dex_cap")
         .and_then(|v| v.as_i64())
@@ -101,10 +95,7 @@ pub fn extract_armor(doc: &Document) -> Armor {
         .get("speed_penalty")
         .and_then(|v| v.as_i64())
         .unwrap_or(0) as i32;
-    let strength = extra
-        .get("strength")
-        .and_then(|v| v.as_u64())
-        .unwrap_or(0) as u32;
+    let strength = extra.get("strength").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
 
     Armor {
         name,
@@ -127,18 +118,9 @@ pub fn extract_armor(doc: &Document) -> Armor {
 pub fn extract_shield(doc: &Document) -> Shield {
     let extra = &doc.extra;
     let name = doc.name.clone().unwrap_or_default();
-    let ac_bonus = extra
-        .get("ac")
-        .and_then(|v| v.as_i64())
-        .unwrap_or(2) as i32;
-    let hardness = extra
-        .get("hardness")
-        .and_then(|v| v.as_i64())
-        .unwrap_or(0) as i32;
-    let hp = extra
-        .get("hp")
-        .and_then(|v| v.as_i64())
-        .unwrap_or(0) as i32;
+    let ac_bonus = extra.get("ac").and_then(|v| v.as_i64()).unwrap_or(2) as i32;
+    let hardness = extra.get("hardness").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+    let hp = extra.get("hp").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
 
     Shield {
         name,

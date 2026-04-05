@@ -20,11 +20,7 @@ pub fn extract_ancestry_data(doc: &Document) -> AncestryData {
         .and_then(|v| v.get("land"))
         .and_then(|v| v.as_u64())
         .unwrap_or(25) as u32;
-    let hp = doc
-        .extra
-        .get("hp")
-        .and_then(|v| v.as_u64())
-        .unwrap_or(0) as u32;
+    let hp = doc.extra.get("hp").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
     let boost_spec = extract_boost_spec(doc);
     let granted_languages = doc
         .extra

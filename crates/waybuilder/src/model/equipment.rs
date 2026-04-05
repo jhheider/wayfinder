@@ -106,21 +106,21 @@ pub struct Weapon {
     pub material: Option<String>,
     // Base stats extracted from AON document
     #[serde(default)]
-    pub damage_die: u8,         // 4, 6, 8, 10, 12
+    pub damage_die: u8, // 4, 6, 8, 10, 12
     #[serde(default)]
-    pub damage_type: String,    // "S", "B", "P"
+    pub damage_type: String, // "S", "B", "P"
     #[serde(default)]
     pub weapon_category: String, // "Simple", "Martial", "Advanced", "Unarmed"
     #[serde(default)]
-    pub weapon_group: String,   // "Sword", "Bow", etc.
+    pub weapon_group: String, // "Sword", "Bow", etc.
     #[serde(default)]
-    pub weapon_type: String,    // "Melee", "Ranged"
+    pub weapon_type: String, // "Melee", "Ranged"
     #[serde(default)]
-    pub hands: String,          // "1", "1+", "2"
+    pub hands: String, // "1", "1+", "2"
     #[serde(default)]
-    pub traits: Vec<String>,    // raw traits like "Finesse", "Thrown 10 ft."
+    pub traits: Vec<String>, // raw traits like "Finesse", "Thrown 10 ft."
     #[serde(default)]
-    pub range: u32,             // 0 = melee
+    pub range: u32, // 0 = melee
 }
 
 impl Weapon {
@@ -142,9 +142,9 @@ impl Weapon {
     }
 
     pub fn has_trait(&self, name: &str) -> bool {
-        self.traits
-            .iter()
-            .any(|t| t.eq_ignore_ascii_case(name) || t.to_lowercase().starts_with(&name.to_lowercase()))
+        self.traits.iter().any(|t| {
+            t.eq_ignore_ascii_case(name) || t.to_lowercase().starts_with(&name.to_lowercase())
+        })
     }
 
     pub fn damage_die_str(&self) -> String {

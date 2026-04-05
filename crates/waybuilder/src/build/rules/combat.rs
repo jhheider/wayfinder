@@ -25,48 +25,26 @@ pub fn compute_ac(
 }
 
 /// Compute a saving throw bonus: ability_mod + rank.bonus() + level.
-pub fn compute_save(
-    abilities: &Abilities,
-    ability: Ability,
-    rank: Rank,
-    level: u8,
-) -> i32 {
+pub fn compute_save(abilities: &Abilities, ability: Ability, rank: Rank, level: u8) -> i32 {
     abilities.modifier(ability) + rank.bonus() + level as i32
 }
 
 /// Compute perception bonus: WIS mod + rank.bonus() + level.
-pub fn compute_perception(
-    abilities: &Abilities,
-    rank: Rank,
-    level: u8,
-) -> i32 {
+pub fn compute_perception(abilities: &Abilities, rank: Rank, level: u8) -> i32 {
     abilities.modifier(Ability::Wisdom) + rank.bonus() + level as i32
 }
 
 /// Compute class DC: 10 + key ability mod + rank.bonus() + level.
-pub fn compute_class_dc(
-    abilities: &Abilities,
-    key_ability: Ability,
-    rank: Rank,
-    level: u8,
-) -> i32 {
+pub fn compute_class_dc(abilities: &Abilities, key_ability: Ability, rank: Rank, level: u8) -> i32 {
     10 + abilities.modifier(key_ability) + rank.bonus() + level as i32
 }
 
 /// Compute melee attack bonus: STR mod + rank.bonus() + level.
-pub fn compute_melee_attack(
-    abilities: &Abilities,
-    rank: Rank,
-    level: u8,
-) -> i32 {
+pub fn compute_melee_attack(abilities: &Abilities, rank: Rank, level: u8) -> i32 {
     abilities.modifier(Ability::Strength) + rank.bonus() + level as i32
 }
 
 /// Compute ranged attack bonus: DEX mod + rank.bonus() + level.
-pub fn compute_ranged_attack(
-    abilities: &Abilities,
-    rank: Rank,
-    level: u8,
-) -> i32 {
+pub fn compute_ranged_attack(abilities: &Abilities, rank: Rank, level: u8) -> i32 {
     abilities.modifier(Ability::Dexterity) + rank.bonus() + level as i32
 }
