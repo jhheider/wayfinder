@@ -219,8 +219,17 @@ fn render_spells<'a>(app: &App, block: Block<'a>) -> Paragraph<'a> {
     };
 
     let rank_labels = [
-        "Cantrips", "1st Rank", "2nd Rank", "3rd Rank", "4th Rank",
-        "5th Rank", "6th Rank", "7th Rank", "8th Rank", "9th Rank", "10th Rank",
+        "Cantrips",
+        "1st Rank",
+        "2nd Rank",
+        "3rd Rank",
+        "4th Rank",
+        "5th Rank",
+        "6th Rank",
+        "7th Rank",
+        "8th Rank",
+        "9th Rank",
+        "10th Rank",
     ];
 
     let focused = app.focus == Focus::DetailTabs && app.detail_tab == DetailTab::Spells;
@@ -245,22 +254,23 @@ fn render_spells<'a>(app: &App, block: Block<'a>) -> Paragraph<'a> {
                     .fg(Color::Cyan)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::styled(
-                format!("[{count}]"),
-                Style::default().fg(Color::DarkGray),
-            ),
+            Span::styled(format!("[{count}]"), Style::default().fg(Color::DarkGray)),
         ]));
 
         let prepared = app.choices.prepared_spells.get(&rank);
         for slot_i in 0..count {
-            let spell_name = prepared.and_then(|v| v.get(slot_i)).map(|s| s.name.as_str());
+            let spell_name = prepared
+                .and_then(|v| v.get(slot_i))
+                .map(|s| s.name.as_str());
             let is_cursor = focused && flat_idx == app.spell_cursor;
             let (marker, name_str) = match spell_name {
                 Some(name) => ("✓", name.to_string()),
                 None => ("○", "────".to_string()),
             };
             let style = if is_cursor {
-                Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD)
             } else if spell_name.is_some() {
                 Style::default().fg(Color::White)
             } else {
@@ -422,7 +432,10 @@ fn render_equipment<'a>(app: &'a App, block: Block<'a>) -> Paragraph<'a> {
         }
         flat_idx += 1;
     }
-    lines.push(Line::from(Span::styled("  + Add Weapon", add_style(flat_idx))));
+    lines.push(Line::from(Span::styled(
+        "  + Add Weapon",
+        add_style(flat_idx),
+    )));
     flat_idx += 1;
     lines.push(Line::from(""));
 
@@ -442,7 +455,10 @@ fn render_equipment<'a>(app: &'a App, block: Block<'a>) -> Paragraph<'a> {
         )));
         flat_idx += 1;
     }
-    lines.push(Line::from(Span::styled("  + Add Armor", add_style(flat_idx))));
+    lines.push(Line::from(Span::styled(
+        "  + Add Armor",
+        add_style(flat_idx),
+    )));
     flat_idx += 1;
     lines.push(Line::from(""));
 
@@ -462,7 +478,10 @@ fn render_equipment<'a>(app: &'a App, block: Block<'a>) -> Paragraph<'a> {
         )));
         flat_idx += 1;
     }
-    lines.push(Line::from(Span::styled("  + Add Shield", add_style(flat_idx))));
+    lines.push(Line::from(Span::styled(
+        "  + Add Shield",
+        add_style(flat_idx),
+    )));
     flat_idx += 1;
     lines.push(Line::from(""));
 
@@ -487,7 +506,10 @@ fn render_equipment<'a>(app: &'a App, block: Block<'a>) -> Paragraph<'a> {
         )));
         flat_idx += 1;
     }
-    lines.push(Line::from(Span::styled("  + Add Item", add_style(flat_idx))));
+    lines.push(Line::from(Span::styled(
+        "  + Add Item",
+        add_style(flat_idx),
+    )));
     // flat_idx += 1; // not needed, last item
     lines.push(Line::from(""));
 

@@ -2,16 +2,16 @@ use crossterm::event::{self, Event, KeyCode, KeyModifiers};
 
 use super::app::{App, DetailTab, Focus, Modal, Screen, progression_for, sync_progression};
 use crate::build::choices::{AbilityChoiceSet, FeatSelection, SpellSlotChoice};
-use crate::model::types::DivineFont;
 use crate::build::mechanics::equipment as equip_extract;
-use crate::model::equipment::Item;
 use crate::build::mechanics::{ancestry, background, class, deity, subclass};
 use crate::build::progression::ProgressionEntry;
 use crate::build::recalculate::recalculate;
 use crate::build::slot::BuildSlot;
 use crate::data::loader::LoadRequest;
 use crate::model::abilities::BoostSpec;
+use crate::model::equipment::Item;
 use crate::model::proficiencies::Rank;
+use crate::model::types::DivineFont;
 
 pub fn poll_event(app: &mut App) -> anyhow::Result<()> {
     if !event::poll(std::time::Duration::from_millis(50))? {
@@ -346,9 +346,7 @@ fn clear_slot(app: &mut App) {
             app.choices.background = None;
             app.choices.background_data = None;
             app.choices.ability_choices.remove("background");
-            app.choices
-                .feats
-                .retain(|k, _| k != "background_feat");
+            app.choices.feats.retain(|k, _| k != "background_feat");
         }
         BuildSlot::Class => {
             app.choices.class = None;
@@ -497,8 +495,7 @@ fn open_modal_for_cursor(app: &mut App) {
     // ClassFeature slots show info modal (read-only)
     if slot == BuildSlot::ClassFeature {
         if let Some(name) = &state.filled {
-            let modal =
-                crate::ui::modal::info::InfoModal::new(name);
+            let modal = crate::ui::modal::info::InfoModal::new(name);
             app.modal = Some(Modal::Info(Box::new(modal)));
             let _ = app.loader_tx.send(LoadRequest::ShowDocument {
                 name: name.clone(),
@@ -1019,22 +1016,14 @@ fn handle_equipment_enter(app: &mut App) {
     match section {
         0 => {
             let w = &app.choices.equipment.weapons[idx];
-            let modal = crate::ui::modal::runes::RuneModal::for_weapon(
-                idx,
-                &w.name,
-                w.potency,
-                w.striking,
-            );
+            let modal =
+                crate::ui::modal::runes::RuneModal::for_weapon(idx, &w.name, w.potency, w.striking);
             app.modal = Some(Modal::Runes(modal));
         }
         1 => {
             let a = &app.choices.equipment.armor[idx];
-            let modal = crate::ui::modal::runes::RuneModal::for_armor(
-                idx,
-                &a.name,
-                a.potency,
-                a.resilient,
-            );
+            let modal =
+                crate::ui::modal::runes::RuneModal::for_armor(idx, &a.name, a.potency, a.resilient);
             app.modal = Some(Modal::Runes(modal));
         }
         2 => {
@@ -1093,31 +1082,20 @@ fn open_equipment_rune_modal(app: &mut App) {
     match section {
         0 => {
             let w = &app.choices.equipment.weapons[idx];
-            let modal = crate::ui::modal::runes::RuneModal::for_weapon(
-                idx,
-                &w.name,
-                w.potency,
-                w.striking,
-            );
+            let modal =
+                crate::ui::modal::runes::RuneModal::for_weapon(idx, &w.name, w.potency, w.striking);
             app.modal = Some(Modal::Runes(modal));
         }
         1 => {
             let a = &app.choices.equipment.armor[idx];
-            let modal = crate::ui::modal::runes::RuneModal::for_armor(
-                idx,
-                &a.name,
-                a.potency,
-                a.resilient,
-            );
+            let modal =
+                crate::ui::modal::runes::RuneModal::for_armor(idx, &a.name, a.potency, a.resilient);
             app.modal = Some(Modal::Runes(modal));
         }
         2 => {
             if let Some(s) = &app.choices.equipment.shield {
-                let modal = crate::ui::modal::runes::RuneModal::for_shield(
-                    &s.name,
-                    s.potency,
-                    s.resilient,
-                );
+                let modal =
+                    crate::ui::modal::runes::RuneModal::for_shield(&s.name, s.potency, s.resilient);
                 app.modal = Some(Modal::Runes(modal));
             }
         }
@@ -1168,11 +1146,7 @@ fn handle_domain_key(app: &mut App, code: KeyCode) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn apply_domain_pick(
-    app: &mut App,
-    kind: crate::ui::modal::domain::PickKind,
-    value: &str,
-) {
+fn apply_domain_pick(app: &mut App, kind: crate::ui::modal::domain::PickKind, value: &str) {
     use crate::ui::modal::domain::PickKind;
     match kind {
         PickKind::Domain => {

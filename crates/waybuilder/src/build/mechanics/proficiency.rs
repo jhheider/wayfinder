@@ -68,10 +68,7 @@ pub fn extract_proficiency_grants(text: &str) -> Vec<ProficiencyGrant> {
 /// - "You become an expert in X"
 /// - "Your X proficiency increases to Y"
 #[allow(dead_code)]
-pub fn extract_proficiency_advances(
-    text: &str,
-    level: u8,
-) -> Vec<ProficiencyAdvance> {
+pub fn extract_proficiency_advances(text: &str, level: u8) -> Vec<ProficiencyAdvance> {
     let mut advances = Vec::new();
     let lower = text.to_lowercase();
 

@@ -51,7 +51,11 @@ pub fn validate_progression(
                     && (!needs_bg || choices.background_data.is_some())
                     && (!needs_class || choices.class_data.is_some())
             }
-            BuildSlot::Subclass => choices.class_data.as_ref().and_then(|d| d.subclass_category.as_ref()).is_some(),
+            BuildSlot::Subclass => choices
+                .class_data
+                .as_ref()
+                .and_then(|d| d.subclass_category.as_ref())
+                .is_some(),
             _ => true,
         };
     }

@@ -12,7 +12,6 @@ pub enum ProgressionEntry {
 /// Generate the full level-by-level progression for a character.
 pub fn build_progression(max_level: u8) -> Vec<ProgressionEntry> {
     build_progression_with_class(max_level, None, &[])
-
 }
 
 /// Generate progression with class-aware slots (subclass, deity, class features).
@@ -27,9 +26,7 @@ pub fn build_progression_with_class(
         .is_some();
     let needs_deity = choices
         .and_then(|c| c.class.as_deref())
-        .is_some_and(|name| {
-            crate::build::mechanics::subclass::requires_deity(name)
-        });
+        .is_some_and(crate::build::mechanics::subclass::requires_deity);
 
     let mut entries = Vec::new();
     for lvl in 1..=max_level.max(1) {
@@ -67,11 +64,7 @@ pub fn build_progression_with_class(
     entries
 }
 
-fn level_1_slots(
-    entries: &mut Vec<ProgressionEntry>,
-    has_subclass: bool,
-    needs_deity: bool,
-) {
+fn level_1_slots(entries: &mut Vec<ProgressionEntry>, has_subclass: bool, needs_deity: bool) {
     entries.push(ProgressionEntry::Slot(SlotState::new(
         BuildSlot::Ancestry,
         1,
@@ -84,10 +77,7 @@ fn level_1_slots(
         BuildSlot::Background,
         1,
     )));
-    entries.push(ProgressionEntry::Slot(SlotState::new(
-        BuildSlot::Class,
-        1,
-    )));
+    entries.push(ProgressionEntry::Slot(SlotState::new(BuildSlot::Class, 1)));
     if has_subclass {
         entries.push(ProgressionEntry::Slot(SlotState::new(
             BuildSlot::Subclass,
@@ -95,10 +85,7 @@ fn level_1_slots(
         )));
     }
     if needs_deity {
-        entries.push(ProgressionEntry::Slot(SlotState::new(
-            BuildSlot::Deity,
-            1,
-        )));
+        entries.push(ProgressionEntry::Slot(SlotState::new(BuildSlot::Deity, 1)));
     }
     entries.push(ProgressionEntry::Slot(SlotState::new(
         BuildSlot::AbilityBoosts,
@@ -110,10 +97,7 @@ fn level_1_slots(
     )));
 }
 
-fn skill_selection_slots(
-    entries: &mut Vec<ProgressionEntry>,
-    choices: Option<&BuildChoices>,
-) {
+fn skill_selection_slots(entries: &mut Vec<ProgressionEntry>, choices: Option<&BuildChoices>) {
     let count = choices
         .and_then(|c| c.class_data.as_ref())
         .map(|d| d.additional_skill_count)

@@ -71,9 +71,7 @@ impl SelectionModal {
                     let ancestry_match = name_lower.contains(&anc_lower)
                         || traits_lower.iter().any(|t| t == &anc_lower);
                     // Versatile heritages have no ancestry-specific trait
-                    let is_versatile = traits_lower
-                        .iter()
-                        .any(|t| t == "versatile heritage");
+                    let is_versatile = traits_lower.iter().any(|t| t == "versatile heritage");
                     if !ancestry_match && !is_versatile {
                         return false;
                     }

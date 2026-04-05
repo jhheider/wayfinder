@@ -1,15 +1,19 @@
 use std::collections::HashMap;
 
-use wayfinder_core::aon::Document;
-use waybuilder::build::mechanics::{ancestry, background, class, subclass};
 use waybuilder::build::mechanics::boosts::{extract_boost_spec, parse_ability};
-use waybuilder::build::mechanics::proficiency::{extract_proficiency_advances, extract_proficiency_grants, parse_rank};
+use waybuilder::build::mechanics::proficiency::{
+    extract_proficiency_advances, extract_proficiency_grants, parse_rank,
+};
 use waybuilder::build::mechanics::skills::{extract_class_skill_grants, extract_skill_grants};
+use waybuilder::build::mechanics::{ancestry, background, class, subclass};
 use waybuilder::build::rules::combat;
-use waybuilder::build::rules::proficiency::{apply_proficiency_advances, class_proficiency_advances};
+use waybuilder::build::rules::proficiency::{
+    apply_proficiency_advances, class_proficiency_advances,
+};
 use waybuilder::model::abilities::{Abilities, Ability, BoostSource};
 use waybuilder::model::character::Character;
 use waybuilder::model::proficiencies::Rank;
+use wayfinder_core::aon::Document;
 
 fn make_doc() -> Document {
     Document {
@@ -60,10 +64,8 @@ fn parse_rank_values() {
 fn extract_boost_spec_mixed() {
     let mut doc = make_doc();
     doc.attribute = vec!["Dexterity".into(), "Free".into()];
-    doc.extra.insert(
-        "attribute_flaw".into(),
-        serde_json::json!(["Constitution"]),
-    );
+    doc.extra
+        .insert("attribute_flaw".into(), serde_json::json!(["Constitution"]));
     let spec = extract_boost_spec(&doc);
     assert_eq!(spec.fixed, vec![Ability::Dexterity]);
     assert_eq!(spec.free, 1);
@@ -79,10 +81,8 @@ fn extract_ancestry_data_dwarf() {
     doc.extra
         .insert("speed".into(), serde_json::json!({"land": 20}));
     doc.extra.insert("hp".into(), serde_json::json!(10));
-    doc.extra.insert(
-        "attribute_flaw".into(),
-        serde_json::json!(["Charisma"]),
-    );
+    doc.extra
+        .insert("attribute_flaw".into(), serde_json::json!(["Charisma"]));
 
     let data = ancestry::extract_ancestry_data(&doc);
     assert_eq!(data.size.as_deref(), Some("Medium"));
@@ -97,8 +97,10 @@ fn extract_ancestry_data_dwarf() {
 fn extract_background_data_with_lore() {
     let mut doc = make_doc();
     doc.attribute = vec!["Strength".into(), "Constitution".into()];
-    doc.extra
-        .insert("skill".into(), serde_json::json!(["Athletics", "Warfare Lore"]));
+    doc.extra.insert(
+        "skill".into(),
+        serde_json::json!(["Athletics", "Warfare Lore"]),
+    );
     doc.extra
         .insert("feat".into(), serde_json::json!(["Titan Wrestler"]));
 
@@ -115,18 +117,12 @@ fn extract_class_data_fighter() {
     let mut doc = make_doc();
     doc.attribute = vec!["Strength".into(), "Dexterity".into()];
     doc.extra.insert("hp".into(), serde_json::json!(10));
-    doc.extra.insert(
-        "perception_proficiency".into(),
-        serde_json::json!("expert"),
-    );
-    doc.extra.insert(
-        "fortitude_proficiency".into(),
-        serde_json::json!("expert"),
-    );
-    doc.extra.insert(
-        "reflex_proficiency".into(),
-        serde_json::json!("trained"),
-    );
+    doc.extra
+        .insert("perception_proficiency".into(), serde_json::json!("expert"));
+    doc.extra
+        .insert("fortitude_proficiency".into(), serde_json::json!("expert"));
+    doc.extra
+        .insert("reflex_proficiency".into(), serde_json::json!("trained"));
     doc.extra
         .insert("will_proficiency".into(), serde_json::json!("trained"));
     doc.extra.insert(
@@ -135,7 +131,12 @@ fn extract_class_data_fighter() {
     );
     doc.extra.insert(
         "defense_proficiency".into(),
-        serde_json::json!(["Unarmored Defense", "Light Armor", "Medium Armor", "Heavy Armor"]),
+        serde_json::json!([
+            "Unarmored Defense",
+            "Light Armor",
+            "Medium Armor",
+            "Heavy Armor"
+        ]),
     );
     doc.extra.insert(
         "skill_proficiency".into(),
@@ -209,8 +210,14 @@ fn compute_ac_level_1_trained() {
 fn compute_save_with_expert() {
     let abilities = Abilities {
         boosts: vec![
-            BoostSource { source: "a".into(), ability: Ability::Constitution },
-            BoostSource { source: "b".into(), ability: Ability::Constitution },
+            BoostSource {
+                source: "a".into(),
+                ability: Ability::Constitution,
+            },
+            BoostSource {
+                source: "b".into(),
+                ability: Ability::Constitution,
+            },
         ],
         flaws: vec![],
     };
@@ -223,9 +230,18 @@ fn compute_save_with_expert() {
 fn compute_class_dc() {
     let abilities = Abilities {
         boosts: vec![
-            BoostSource { source: "a".into(), ability: Ability::Charisma },
-            BoostSource { source: "b".into(), ability: Ability::Charisma },
-            BoostSource { source: "c".into(), ability: Ability::Charisma },
+            BoostSource {
+                source: "a".into(),
+                ability: Ability::Charisma,
+            },
+            BoostSource {
+                source: "b".into(),
+                ability: Ability::Charisma,
+            },
+            BoostSource {
+                source: "c".into(),
+                ability: Ability::Charisma,
+            },
         ],
         flaws: vec![],
     };
@@ -315,10 +331,7 @@ fn extract_advances_from_text_increases_pattern() {
 // Fixture-based tests
 
 fn load_fixture(name: &str) -> Document {
-    let path = format!(
-        "{}/tests/fixtures/{name}",
-        env!("CARGO_MANIFEST_DIR")
-    );
+    let path = format!("{}/tests/fixtures/{name}", env!("CARGO_MANIFEST_DIR"));
     let data = std::fs::read_to_string(&path).expect(&format!("fixture {name} not found"));
     serde_json::from_str(&data).expect(&format!("fixture {name} invalid JSON"))
 }
@@ -450,7 +463,11 @@ fn fixture_sorcerer_class_features_extracted() {
     let data = class::extract_class_data(&doc);
     assert!(!data.class_features.is_empty());
     // Should have "bloodline" at level 1
-    let l1: Vec<_> = data.class_features.iter().filter(|f| f.level == 1).collect();
+    let l1: Vec<_> = data
+        .class_features
+        .iter()
+        .filter(|f| f.level == 1)
+        .collect();
     assert!(!l1.is_empty());
     let names: Vec<&str> = l1.iter().map(|f| f.name.as_str()).collect();
     assert!(

@@ -85,5 +85,4 @@ impl Character {
             None => format!("{ancestry} / {class} {}", self.level),
         }
     }
-
 }
