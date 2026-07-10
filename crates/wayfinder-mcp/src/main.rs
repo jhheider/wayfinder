@@ -10,13 +10,25 @@ mod query;
 mod server;
 
 use anyhow::Context;
+use clap::Parser;
 use rmcp::ServiceExt;
 use rmcp::transport::stdio;
 
 use crate::server::WayfinderServer;
 
+/// MCP server exposing Archives of Nethys PF2e / SF2e data over stdio JSON-RPC.
+///
+/// Takes no options; run it and connect an MCP client to its stdio. `--version`
+/// and `--help` are handled by clap (and exit before the server starts, which
+/// otherwise blocks waiting for the JSON-RPC handshake on stdin).
+#[derive(Parser)]
+#[command(name = "wayfinder-mcp", version, about)]
+struct Cli {}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    Cli::parse();
+
     // All logging goes to stderr; stdout is reserved for the MCP JSON-RPC stream.
     tracing_subscriber::fmt()
         .with_writer(std::io::stderr)

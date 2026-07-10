@@ -19,6 +19,7 @@ use wayfinder_core::search::{
 #[derive(Parser)]
 #[command(
     name = "wf",
+    version,
     about = "⚔️  Search and browse Pathfinder 2e / Starfinder 2e data"
 )]
 struct Cli {

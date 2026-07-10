@@ -23,5 +23,8 @@
 
 pub mod aon;
 pub mod cache;
+pub mod error;
 pub mod render;
 pub mod search;
+
+pub use error::{Error, Result};

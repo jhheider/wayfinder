@@ -118,7 +118,7 @@ impl MockClient {
 }
 
 impl SearchClient for MockClient {
-    async fn search(&self, _query: &SearchQuery) -> anyhow::Result<Vec<Document>> {
+    async fn search(&self, _query: &SearchQuery) -> wayfinder_core::Result<Vec<Document>> {
         *self.call_count.lock().unwrap() += 1;
         Ok(self.docs.clone())
     }

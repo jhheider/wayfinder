@@ -26,20 +26,28 @@ cargo install wayfinder-mcp
 
 ## Configure an MCP client
 
-Point your client at the installed binary. For example, in a Claude MCP config:
+It is a **stdio** server, so it works with local clients (Claude Desktop, Claude
+Code, Codex CLI). Cloud clients (Claude.ai web/mobile, ChatGPT) need a remote
+HTTP transport, which is not shipped yet.
+
+Point your client at the installed binary. For Claude Desktop, use the
+**absolute** path (GUI apps do not inherit your shell `PATH`) from
+`which wayfinder-mcp`:
 
 ```json
 {
   "mcpServers": {
     "wayfinder": {
-      "command": "wayfinder-mcp"
+      "command": "/Users/you/.cargo/bin/wayfinder-mcp"
     }
   }
 }
 ```
 
-See the [project README](https://github.com/jhheider/wayfinder) for the full
-workspace.
+With Claude Code, one command does it: `claude mcp add wayfinder -- wayfinder-mcp`.
+
+Full per-client setup and the compatibility matrix are in
+[docs/mcp-setup.md](https://github.com/jhheider/wayfinder/blob/main/docs/mcp-setup.md).
 
 ## License
 

@@ -9,7 +9,7 @@ where
 {
     use serde_json::Value;
     Ok(match Option::<Value>::deserialize(deserializer)? {
-        Some(Value::Number(n)) => n.as_i64().map(|v| v as i32),
+        Some(Value::Number(n)) => n.as_i64().and_then(|v| i32::try_from(v).ok()),
         Some(Value::String(s)) => s.trim().parse().ok(),
         _ => None,
     })

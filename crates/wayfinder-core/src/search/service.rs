@@ -1,9 +1,9 @@
-use anyhow::Result;
 use std::path::Path;
 
 use crate::aon::client::SearchClient;
 use crate::aon::{Document, SearchQuery};
 use crate::cache::CacheStore;
+use crate::error::Result;
 
 /// Generic search service parameterized over a `SearchClient` implementation.
 pub struct SearchService<C: SearchClient> {

@@ -1,10 +1,10 @@
-use anyhow::{Context, Result, bail};
 use serde_json::Value;
 use std::future::Future;
 use std::time::Duration;
 
 use super::models::Document;
 use super::query::SearchQuery;
+use crate::error::{Error, Result};
 
 /// Trait for searching AON documents, enabling mock implementations for tests.
 pub trait SearchClient: Send + Sync {
@@ -64,8 +64,7 @@ impl AonClient {
         let http = reqwest::Client::builder()
             .connect_timeout(Duration::from_secs(10))
             .timeout(Duration::from_secs(30))
-            .build()
-            .context("Failed to build HTTP client")?;
+            .build()?;
         Ok(Self { http, system })
     }
 
@@ -97,24 +96,23 @@ impl AonClient {
             let resp = self.do_post(&url, body).await?;
             let status = resp.status();
             if !status.is_success() {
-                bail!("AON returned HTTP {status} after retry");
+                return Err(Error::HttpStatus {
+                    status: status.as_u16(),
+                });
             }
-            return resp.json().await.context("Failed to parse AON response");
+            return Ok(resp.json().await?);
         }
 
         if !status.is_success() {
-            bail!("AON returned HTTP {status}");
+            return Err(Error::HttpStatus {
+                status: status.as_u16(),
+            });
         }
-        resp.json().await.context("Failed to parse AON response")
+        Ok(resp.json().await?)
     }
 
     async fn do_post(&self, url: &str, body: &Value) -> Result<reqwest::Response> {
-        self.http
-            .post(url)
-            .json(body)
-            .send()
-            .await
-            .context("AON request failed")
+        Ok(self.http.post(url).json(body).send().await?)
     }
 }
 
@@ -131,13 +129,11 @@ pub fn parse_documents(response: &Value) -> Result<Vec<Document>> {
     let hits = response
         .pointer("/hits/hits")
         .and_then(|v| v.as_array())
-        .context("Missing hits.hits in response")?;
+        .ok_or_else(|| Error::UnexpectedResponse("missing hits.hits".to_string()))?;
 
     hits.iter()
         .filter_map(|hit| hit.get("_source"))
-        .map(|src| {
-            serde_json::from_value::<Document>(src.clone()).context("Failed to parse document")
-        })
+        .map(|src| serde_json::from_value::<Document>(src.clone()).map_err(Error::from))
         .collect()
 }
 

@@ -55,9 +55,18 @@ Each binary is packaged separately. Prebuilt archives for macOS, Linux (musl),
 and Windows are attached to every
 [release](https://github.com/jhheider/wayfinder/releases).
 
+Before the first tagged release lands on crates.io / Homebrew, install straight
+from source:
+
+```sh
+cargo install --git https://github.com/jhheider/wayfinder wayfinder-cli
+cargo install --git https://github.com/jhheider/wayfinder wayfinder-mcp
+```
+
 ## What's in the box
 
-This is a Cargo workspace with three crates -- one AON client, three frontends:
+This is a Cargo workspace with three crates -- one AON client library and two
+frontends:
 
 - **[`wayfinder-core`](crates/wayfinder-core)** -- the library: AON Elasticsearch
   client, SQLite cache with TTLs, unified search, and an HTML/markdown renderer.
@@ -65,8 +74,37 @@ This is a Cargo workspace with three crates -- one AON client, three frontends:
 - **[`wayfinder-cli`](crates/wayfinder-cli)** -- the `wf` binary built on top of it.
 - **[`wayfinder-mcp`](crates/wayfinder-mcp)** -- an [MCP](https://modelcontextprotocol.io)
   server exposing AON data (`search`, `get`, `list_categories`) to LLM tools like
-  Claude. `cargo install wayfinder-mcp`, then point your MCP client at the
-  `wayfinder-mcp` binary.
+  Claude (see below).
+
+## Use it from your AI assistant (MCP)
+
+`wayfinder-mcp` exposes AON search to LLM tools as three MCP tools: `search`,
+`get`, and `list_categories` (Pathfinder 2e by default, `sf2e` optional). Ask
+Claude things like *"What does the Grab an Edge action do in PF2e?"* and it
+looks them up live.
+
+It is a **stdio** server, so it works today with **Claude Desktop, Claude Code,
+and Codex CLI**. Cloud clients (Claude.ai web/mobile, ChatGPT) need a remote
+HTTP server, which is not shipped yet. Full per-client instructions and the
+compatibility matrix are in **[docs/mcp-setup.md](docs/mcp-setup.md)**.
+
+Quick start with Claude Code:
+
+```sh
+cargo install wayfinder-mcp
+claude mcp add wayfinder -- wayfinder-mcp
+```
+
+For Claude Desktop, use the **absolute** path (GUI apps do not inherit your
+shell `PATH`) from `which wayfinder-mcp` in `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "wayfinder": { "command": "/Users/you/.cargo/bin/wayfinder-mcp" }
+  }
+}
+```
 
 ## Data sources
 
@@ -88,6 +126,16 @@ cross-compile cleanly to musl and aarch64.
 - `--format json` -- raw JSON, for piping and scripting.
 - `--format md` -- raw AON markdown.
 
+## Credits
+
+Game data comes from [Archives of Nethys](https://2e.aonprd.com), the official
+Pathfinder 2e / Starfinder 2e online reference. Pathfinder and Starfinder are
+trademarks of Paizo Inc.; game mechanics and rules text are used under Paizo's
+[Community Use Policy](https://paizo.com/community/communityuse) and the ORC /
+OGL where applicable. This project is not published, endorsed by, or affiliated
+with Paizo Inc. or Archives of Nethys.
+
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE). Applies to this tool's own code, not to the
+game-data content it retrieves.

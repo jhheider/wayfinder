@@ -1,7 +1,8 @@
 # Wayfinder -- Archives of Nethys data tools (PF2e / SF2e)
 
 A Rust workspace of tools for querying Archives of Nethys Pathfinder 2e and
-Starfinder 2e game data. One AON client, three frontends.
+Starfinder 2e game data. One AON client library, two frontends (a CLI and an
+MCP server).
 
 ## Project Structure
 - **wayfinder-core** -- library: AON Elasticsearch client, SQLite cache, search,
@@ -38,6 +39,15 @@ cargo run -p wayfinder-mcp
   document a function (e.g. the MCP query builders).
 - Target ~100-120 lines per file; split into submodules when larger.
 - Use `cargo add` for new dependencies (ensures latest versions).
+
+## Error handling
+- **Library (wayfinder-core): typed errors, not anyhow.** The public API returns
+  `wayfinder_core::Result<T>` / `Error` (a `thiserror` enum in `error.rs`;
+  `aon::parse::CategoryError` is a separate typed error). Do not reintroduce
+  `anyhow` into core's `[dependencies]`.
+- **Binaries (wf, wayfinder-mcp): anyhow.** They `?` core's typed errors (anyhow
+  absorbs any `std::error::Error`). Both binaries use `clap` (so `--version` /
+  `--help` work); the MCP's `Cli` is an empty struct that just exits on those.
 
 ## Dependency preferences
 - **TLS: rustls + ring, never openssl/aws-lc.** reqwest uses
@@ -88,6 +98,9 @@ packager doc generation (`gen-docs: true`).
 - `rmcp` 2.x: tool results use `ContentBlock` (not `Content`).
 - Verify tool changes against LIVE AON by driving stdio JSON-RPC, not just a
   compile -- the tool surface must keep matching real Nethys results.
+- stdio-only today; cloud clients (Claude.ai web/mobile, ChatGPT) need a remote
+  HTTP transport (rmcp ships one) that is not wired yet. Per-client setup lives
+  in `docs/mcp-setup.md`.
 
 ## References
 `references/` (.gitignored) holds AON exploration aids: `category_fields.json`,

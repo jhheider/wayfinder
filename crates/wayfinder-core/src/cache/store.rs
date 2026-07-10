@@ -1,7 +1,8 @@
-use anyhow::{Context, Result};
 use rusqlite::{Connection, params};
 use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
+
+use crate::error::{Error, Result};
 
 /// SQLite-backed document cache.
 pub struct CacheStore {
@@ -11,7 +12,7 @@ pub struct CacheStore {
 
 impl CacheStore {
     pub fn open(path: &Path) -> Result<Self> {
-        let conn = Connection::open(path).context("Failed to open cache DB")?;
+        let conn = Connection::open(path)?;
         conn.execute_batch(
             "CREATE TABLE IF NOT EXISTS documents (
                 id TEXT PRIMARY KEY,
@@ -21,8 +22,7 @@ impl CacheStore {
                 fetched_at INTEGER NOT NULL
             );
             CREATE INDEX IF NOT EXISTS idx_cat_name ON documents(category, name);",
-        )
-        .context("Failed to init cache schema")?;
+        )?;
         Ok(Self {
             conn,
             ttl_secs: 86400 * 7,
@@ -41,7 +41,7 @@ impl CacheStore {
         match stmt.query_row(params![id, cutoff], |row| row.get::<_, String>(0)) {
             Ok(data) => Ok(Some(data)),
             Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
-            Err(e) => Err(e).context("Failed to read from cache"),
+            Err(e) => Err(Error::Cache(e)),
         }
     }
 
