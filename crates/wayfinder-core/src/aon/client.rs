@@ -50,6 +50,7 @@ impl GameSystem {
 }
 
 /// HTTP client for AON's Elasticsearch backend.
+#[derive(Clone)]
 pub struct AonClient {
     http: reqwest::Client,
     pub system: GameSystem,
@@ -57,6 +58,9 @@ pub struct AonClient {
 
 impl AonClient {
     pub fn new(system: GameSystem) -> Result<Self> {
+        // reqwest is built with rustls-no-provider; install ring process-wide
+        // (idempotent -- Err just means a provider is already set).
+        let _ = rustls::crypto::ring::default_provider().install_default();
         let http = reqwest::Client::builder()
             .connect_timeout(Duration::from_secs(10))
             .timeout(Duration::from_secs(30))
@@ -69,7 +73,7 @@ impl AonClient {
     pub async fn search(&self, query: &SearchQuery) -> Result<Vec<Document>> {
         let body = query.build();
         let raw = self.search_raw(&body).await?;
-        parse_hits(&raw)
+        parse_documents(&raw)
     }
 
     /// Execute a raw JSON query body, returning the full response.
@@ -120,7 +124,10 @@ impl SearchClient for AonClient {
     }
 }
 
-fn parse_hits(response: &Value) -> Result<Vec<Document>> {
+/// Parse the `_source` of every hit in a raw AON/Elasticsearch response into
+/// [`Document`]s. Public so consumers that post custom query bodies via
+/// [`AonClient::search_raw`] can reuse the same parsing.
+pub fn parse_documents(response: &Value) -> Result<Vec<Document>> {
     let hits = response
         .pointer("/hits/hits")
         .and_then(|v| v.as_array())
@@ -132,4 +139,12 @@ fn parse_hits(response: &Value) -> Result<Vec<Document>> {
             serde_json::from_value::<Document>(src.clone()).context("Failed to parse document")
         })
         .collect()
+}
+
+/// Total number of matches reported by a raw AON/Elasticsearch response
+/// (`hits.total.value`), independent of how many hits were returned.
+pub fn parse_total(response: &Value) -> Option<i64> {
+    response
+        .pointer("/hits/total/value")
+        .and_then(serde_json::Value::as_i64)
 }

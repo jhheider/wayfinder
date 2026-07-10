@@ -10,7 +10,7 @@ fn title_renders_as_heading() {
         action: Some("Two Actions".into()),
     }];
     let md = render_markdown(&blocks);
-    assert_eq!(md, "## Fireball (Two Actions) — Spell 3");
+    assert_eq!(md, "## Fireball (Two Actions) - Spell 3");
 }
 
 #[test]

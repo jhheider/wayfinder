@@ -1,5 +1,5 @@
 //! Render `ContentBlock` to styled terminal text spans.
-//! No ANSI codes — consumers apply their own styling via the `Span` enum.
+//! No ANSI codes -- consumers apply their own styling via the `Span` enum.
 
 use super::content::{ContentBlock, InlineContent};
 
@@ -9,7 +9,7 @@ pub enum Span {
     Text(String),
     Bold(String),
     Italic(String),
-    /// Heading — level 1..3.
+    /// Heading -- level 1..3.
     Title {
         level: u8,
         text: String,
@@ -134,7 +134,7 @@ pub fn action_icon(action: &str) -> &str {
         "three actions" => "◆◆◆",
         "free action" => "◇",
         "reaction" => "↺",
-        "variable" => "◆–◆◆◆",
+        "variable" => "◆-◆◆◆",
         _ => action,
     }
 }

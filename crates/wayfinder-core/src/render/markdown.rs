@@ -29,7 +29,7 @@ fn render_block(out: &mut String, block: &ContentBlock, depth: usize) {
                 line.push_str(&format!(" ({a})"));
             }
             if let Some(r) = right {
-                line.push_str(&format!(" — {r}"));
+                line.push_str(&format!(" - {r}"));
             }
             out.push_str(&line);
             out.push('\n');
