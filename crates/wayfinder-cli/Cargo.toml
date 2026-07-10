@@ -1,0 +1,27 @@
+[package]
+name = "wayfinder-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+description = "wf: a terminal tool for searching and browsing Pathfinder 2e / Starfinder 2e data from Archives of Nethys"
+readme = "README.md"
+keywords = ["pathfinder", "starfinder", "ttrpg", "nethys", "cli"]
+categories = ["command-line-utilities", "games"]
+
+[[bin]]
+name = "wf"
+path = "src/main.rs"
+
+[dependencies]
+wayfinder-core = { workspace = true }
+clap = { workspace = true }
+tokio = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+dirs = { workspace = true }
+colored = { workspace = true }
+serde.workspace = true
+clap_complete = "4.6.7"
+clap_mangen = "0.3.0"

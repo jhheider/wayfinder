@@ -1,2 +1,7 @@
 /target
 references/
+coverage/
+**/*.rs.bk
+Cargo.lock.orig
+.DS_Store
+.claude/worktrees/
