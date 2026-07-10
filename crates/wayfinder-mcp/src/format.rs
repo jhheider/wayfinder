@@ -139,3 +139,87 @@ pub fn format_detail(doc: &Document, base_url: &str) -> String {
     }
     out
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{format_detail, format_summary};
+    use serde_json::json;
+    use wayfinder_core::aon::Document;
+
+    fn doc(v: serde_json::Value) -> Document {
+        serde_json::from_value(v).unwrap()
+    }
+
+    #[test]
+    fn summary_includes_type_level_traits_rarity_summary_url() {
+        let d = doc(json!({
+            "name": "Fireball", "type": "Spell", "category": "spell", "level": 3,
+            "trait": ["Fire", "Evocation"], "rarity": "uncommon",
+            "summary": "Boom.", "url": "/Spells.aspx?ID=1"
+        }));
+        let s = format_summary(1, &d, "https://2e.aonprd.com");
+        assert!(s.contains("1. Fireball - Spell 3"), "{s}");
+        assert!(s.contains("[Fire, Evocation]"));
+        assert!(s.contains("(uncommon)"));
+        assert!(s.contains("Boom."));
+        assert!(s.contains("https://2e.aonprd.com/Spells.aspx?ID=1"));
+    }
+
+    #[test]
+    fn summary_hides_common_rarity_and_keeps_absolute_url() {
+        let d = doc(json!({
+            "name": "X", "category": "feat", "rarity": "common",
+            "url": "https://example.test/y"
+        }));
+        let s = format_summary(2, &d, "https://2e.aonprd.com");
+        assert!(!s.contains("(common)"));
+        assert!(s.contains("https://example.test/y"));
+    }
+
+    #[test]
+    fn summary_uses_category_label_and_level_when_no_type() {
+        let d = doc(json!({"name": "Y", "category": "action", "level": 5}));
+        let s = format_summary(1, &d, "b");
+        assert!(s.contains("1. Y - action 5"), "{s}");
+    }
+
+    #[test]
+    fn summary_unknown_name_and_bare_level() {
+        let d = doc(json!({"category": "", "level": 2}));
+        let s = format_summary(3, &d, "b");
+        assert!(s.contains("3. Unknown (level 2)"), "{s}");
+    }
+
+    #[test]
+    fn detail_renders_all_sections_and_prefers_source_raw() {
+        let d = doc(json!({
+            "name": "Force Barrage", "type": "Spell", "category": "spell", "level": 1,
+            "trait": ["Force"], "rarity": "common", "pfs": "Standard",
+            "source": ["Player Core"], "source_raw": ["Player Core pg. 1"],
+            "legacy_name": ["Magic Missile"], "actions": "Single Action",
+            "text": "Darts of force.", "url": "/Spells.aspx?ID=2"
+        }));
+        let s = format_detail(&d, "https://2e.aonprd.com");
+        assert!(s.contains("# Force Barrage  (Spell 1)"), "{s}");
+        assert!(s.contains("Formerly: Magic Missile"));
+        assert!(s.contains("Actions: Single Action"));
+        assert!(s.contains("Traits: Force"));
+        assert!(s.contains("Rarity: common | PFS: Standard"));
+        assert!(s.contains("Source: Player Core pg. 1"));
+        assert!(s.contains("URL: https://2e.aonprd.com/Spells.aspx?ID=2"));
+        assert!(s.contains("Darts of force."));
+    }
+
+    #[test]
+    fn detail_falls_back_to_summary_and_plain_source_and_omits_missing() {
+        let d = doc(json!({
+            "name": "Z", "category": "feat", "source": ["Core"], "summary": "Short."
+        }));
+        let s = format_detail(&d, "b");
+        assert!(s.starts_with("# Z  (feat)"), "{s}");
+        assert!(s.contains("Source: Core"));
+        assert!(s.contains("Short."));
+        assert!(!s.contains("URL:"));
+        assert!(!s.contains("Traits:"));
+    }
+}

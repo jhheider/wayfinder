@@ -470,10 +470,34 @@ async fn main() -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::resolve_show_query;
+    use super::{MAX_INPUT_LEN, is_known_category, parse_filter, resolve_show_query};
 
     fn q(parts: &[&str]) -> Vec<String> {
         parts.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn parse_filter_splits_on_equals() {
+        assert_eq!(
+            parse_filter("domain=Dragon").unwrap(),
+            ("domain".into(), "Dragon".into())
+        );
+        assert!(parse_filter("no-equals-sign").is_err());
+    }
+
+    #[test]
+    fn parse_filter_rejects_overlong_parts() {
+        let long = "x".repeat(MAX_INPUT_LEN + 1);
+        assert!(parse_filter(&format!("{long}=v")).is_err());
+        assert!(parse_filter(&format!("k={long}")).is_err());
+    }
+
+    #[test]
+    fn is_known_category_normalizes_plurals_and_case() {
+        assert!(is_known_category("spell"));
+        assert!(is_known_category("Spells"));
+        assert!(is_known_category("deities"));
+        assert!(!is_known_category("wizardry"));
     }
 
     #[test]

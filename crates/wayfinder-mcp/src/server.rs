@@ -169,3 +169,27 @@ impl ServerHandler for WayfinderServer {
         ))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::parse_category_buckets;
+    use serde_json::json;
+
+    #[test]
+    fn parses_aggregation_buckets() {
+        let resp = json!({"aggregations": {"cats": {"buckets": [
+            {"key": "spell", "doc_count": 405},
+            {"key": "feat", "doc_count": 2130}
+        ]}}});
+        let cats = parse_category_buckets(&resp).unwrap();
+        assert_eq!(
+            cats,
+            vec![("spell".to_string(), 405), ("feat".to_string(), 2130)]
+        );
+    }
+
+    #[test]
+    fn errors_on_missing_aggregation() {
+        assert!(parse_category_buckets(&json!({"hits": {}})).is_err());
+    }
+}
