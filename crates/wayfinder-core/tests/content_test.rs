@@ -293,3 +293,53 @@ fn nested_tags_stripped_in_title() {
         _ => panic!("Expected Title"),
     }
 }
+
+#[test]
+fn list_items_parse_rich_inline_constructs() {
+    let html = r#"<ul><li><b>Bold</b> <i>Ital</i> <trait label="Fire"/> <actions string="Single Action"/> [Doc](/Spells.aspx?ID=1) **starred** _under_</li></ul>"#;
+    let dbg = format!("{:?}", parse_content(html, BASE));
+    for needle in [
+        "Bold",
+        "Ital",
+        "Trait",
+        "Fire",
+        "Action",
+        "Single Action",
+        "Link",
+        "Doc",
+        "starred",
+        "under",
+    ] {
+        assert!(dbg.contains(needle), "missing {needle:?} in {dbg}");
+    }
+}
+
+#[test]
+fn bare_li_without_ul_wrapper() {
+    let dbg = format!("{:?}", parse_content("<li>Loose item</li>", BASE));
+    assert!(dbg.contains("Loose item"), "{dbg}");
+}
+
+#[test]
+fn markdown_link_resolves_relative_url() {
+    let dbg = format!("{:?}", parse_content("See [here](/x) now", BASE));
+    assert!(dbg.contains("here"), "{dbg}");
+    assert!(dbg.contains("https://2e.aonprd.com/x"), "{dbg}");
+}
+
+#[test]
+fn top_level_link_italic_and_hrule() {
+    assert!(
+        format!("{:?}", parse_content("[Fireball](/Spells.aspx?ID=1)", BASE)).contains("Fireball")
+    );
+    assert!(format!("{:?}", parse_content("word _emph_ here", BASE)).contains("emph"));
+    assert!(format!("{:?}", parse_content("above\n---\nbelow", BASE)).contains("HRule"));
+}
+
+#[test]
+fn table_cells_strip_tags() {
+    let html = "<table><tr><td><b>Cell</b> [x](/y)</td><td>Two</td></tr></table>";
+    let dbg = format!("{:?}", parse_content(html, BASE));
+    assert!(dbg.contains("Cell"), "{dbg}");
+    assert!(dbg.contains("Two"), "{dbg}");
+}
