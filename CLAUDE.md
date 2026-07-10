@@ -1,20 +1,20 @@
-# Wayfinder — Archives of Nethys data tools (PF2e / SF2e)
+# Wayfinder -- Archives of Nethys data tools (PF2e / SF2e)
 
 A Rust workspace of tools for querying Archives of Nethys Pathfinder 2e and
 Starfinder 2e game data. One AON client, three frontends.
 
 ## Project Structure
-- **wayfinder-core** — library: AON Elasticsearch client, SQLite cache, search,
+- **wayfinder-core** -- library: AON Elasticsearch client, SQLite cache, search,
   rendering, domain types. The single source of truth for AON access; the CLI
   and MCP server both consume it.
-- **wayfinder-cli** (bin: `wf`) — human-facing terminal tool for searching and
+- **wayfinder-cli** (bin: `wf`) -- human-facing terminal tool for searching and
   browsing AON data (colorized output, cache management).
-- **wayfinder-mcp** (bin: `wayfinder-mcp`) — MCP server exposing AON data to LLM
+- **wayfinder-mcp** (bin: `wayfinder-mcp`) -- MCP server exposing AON data to LLM
   tools (`search`, `get`, `list_categories`) over stdio JSON-RPC.
 
 > The `waybuilder` TUI character builder was shelved (it chased Pathbuilder 2e
 > parity, a moving target). Its history lives on the `archive/waybuilder`
-> branch — do not re-add it to the workspace.
+> branch -- do not re-add it to the workspace.
 
 ## Build & Test
 ```
@@ -61,7 +61,7 @@ packager doc generation (`gen-docs: true`).
 - **SF2e**: `POST https://elasticsearch.aonprd.com/aonsf/_search` → index
   `aonsf10` (~6k docs, 52 categories), base site `https://2e.aonsrd.com`.
 - Category field is `keyword` (use `term` queries, lowercase singular: `spell`,
-  `deity`). `level` may arrive as a number OR a numeric string — `Document`
+  `deity`). `level` may arrive as a number OR a numeric string -- `Document`
   deserializes it tolerantly.
 
 ## CLI Output Formats
@@ -70,24 +70,24 @@ packager doc generation (`gen-docs: true`).
 - `--format md`: raw AON markdown
 
 ## Key Modules (wayfinder-core)
-- `aon::client` — `AonClient` (+ `search_raw` for custom ES bodies, and the
+- `aon::client` -- `AonClient` (+ `search_raw` for custom ES bodies, and the
   public `parse_documents` / `parse_total` helpers), `GameSystem` (PF2e/SF2e)
-- `aon::query` — `SearchQuery` builder (CLI-oriented)
-- `aon::models` — `Document` serde struct with `#[serde(flatten)]` extra fields
-- `aon::categories` — known categories, grouped hierarchy, filterable fields
-- `aon::parse` — category resolution, fuzzy suggestion, compound parsing
-- `cache::store` — `CacheStore` SQLite layer with TTL
-- `render` — AON HTML/markdown → content blocks / `Vec<Span>`; colorize is opt-in
-- `search` — unified `SearchService` (cache + client), category fetch
+- `aon::query` -- `SearchQuery` builder (CLI-oriented)
+- `aon::models` -- `Document` serde struct with `#[serde(flatten)]` extra fields
+- `aon::categories` -- known categories, grouped hierarchy, filterable fields
+- `aon::parse` -- category resolution, fuzzy suggestion, compound parsing
+- `cache::store` -- `CacheStore` SQLite layer with TTL
+- `render` -- AON HTML/markdown → content blocks / `Vec<Span>`; colorize is opt-in
+- `search` -- unified `SearchService` (cache + client), category fetch
 
 ## wayfinder-mcp notes
 - Keeps its own MCP-tuned ES query builders (`query.rs`: sort, level range,
   `_source` projection, category aggregation) and param structs (`params.rs`,
   schemars-described), but routes ALL network I/O and the document model through
-  `wayfinder-core` — no duplicated AON client.
+  `wayfinder-core` -- no duplicated AON client.
 - `rmcp` 2.x: tool results use `ContentBlock` (not `Content`).
 - Verify tool changes against LIVE AON by driving stdio JSON-RPC, not just a
-  compile — the tool surface must keep matching real Nethys results.
+  compile -- the tool surface must keep matching real Nethys results.
 
 ## References
 `references/` (.gitignored) holds AON exploration aids: `category_fields.json`,

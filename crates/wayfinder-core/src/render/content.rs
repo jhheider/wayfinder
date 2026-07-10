@@ -147,7 +147,7 @@ pub fn parse_content(input: &str, base_url: &str) -> Vec<ContentBlock> {
                     });
                 }
             } else if lower.starts_with("</") {
-                // closing tags — ignored
+                // closing tags -- ignored
             }
             // Other tags silently ignored
         } else if c == '[' {

@@ -13,9 +13,10 @@ jobs:
   release:
     uses: jhheider/rust-ci/.github/workflows/release.yml@v1
     with:
-      # `wf` is the prebuilt + Homebrew binary; the MCP server ships via
-      # `cargo install wayfinder-mcp` (all three crates are published below).
-      bin-name: wf
+      # Ship both binaries in each archive. `wf` is first (the "primary"), so
+      # gen-docs generates its man page + completions; wayfinder-mcp needs no
+      # doc flags. All three crates are also published to crates.io below.
+      bin-name: "wf wayfinder-mcp"
       tag: ${{ github.event.inputs.tag }}
       gen-docs: true
       publish-crates: true

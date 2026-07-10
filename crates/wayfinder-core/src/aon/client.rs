@@ -59,7 +59,7 @@ pub struct AonClient {
 impl AonClient {
     pub fn new(system: GameSystem) -> Result<Self> {
         // reqwest is built with rustls-no-provider; install ring process-wide
-        // (idempotent — Err just means a provider is already set).
+        // (idempotent -- Err just means a provider is already set).
         let _ = rustls::crypto::ring::default_provider().install_default();
         let http = reqwest::Client::builder()
             .connect_timeout(Duration::from_secs(10))

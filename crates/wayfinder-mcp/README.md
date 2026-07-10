@@ -10,11 +10,11 @@ client (rustls + ring TLS, no OpenSSL/aws-lc) with the `wf` CLI.
 
 It speaks JSON-RPC over stdio and provides three tools:
 
-- **`search`** — free-text query plus filters (category, traits, level range,
+- **`search`** -- free-text query plus filters (category, traits, level range,
   source, rarity), with sort and result-limit control.
-- **`get`** — full rules text for one entry by exact `name` (legacy pre-remaster
+- **`get`** -- full rules text for one entry by exact `name` (legacy pre-remaster
   names resolve too) or by AoN `url`.
-- **`list_categories`** — live category names and entry counts for a game.
+- **`list_categories`** -- live category names and entry counts for a game.
 
 Every tool takes an optional `game`: `"pf2e"` (default) or `"sf2e"`.
 

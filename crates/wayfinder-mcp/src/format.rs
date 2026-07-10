@@ -52,7 +52,7 @@ pub fn format_summary(index: usize, doc: &Document, base_url: &str) -> String {
     let label = type_label(doc);
     let mut header = format!("{index}. {name}");
     if !label.is_empty() {
-        header.push_str(&format!(" — {label}"));
+        header.push_str(&format!(" - {label}"));
         if let Some(level) = doc.level {
             header.push_str(&format!(" {level}"));
         }

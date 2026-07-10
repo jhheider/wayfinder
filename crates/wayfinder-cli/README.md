@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/wayfinder-cli.svg)](https://crates.io/crates/wayfinder-cli)
 
-`wf` — a fast, colorized terminal tool for searching and browsing
+`wf` -- a fast, colorized terminal tool for searching and browsing
 [Archives of Nethys](https://2e.aonprd.com) Pathfinder 2e and Starfinder 2e data.
 
 ```sh

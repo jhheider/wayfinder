@@ -8,14 +8,14 @@
 //!
 //! The four modules mirror that flow:
 //!
-//! - [`aon`] — the Elasticsearch [`client`](aon::client), the
+//! - [`aon`] -- the Elasticsearch [`client`](aon::client), the
 //!   [`query`](aon::query) builder, the document [`models`](aon::models), and
 //!   the known [`categories`](aon::categories) with their filterable fields.
-//! - [`cache`] — a SQLite-backed [`CacheStore`](cache::store::CacheStore) with
+//! - [`cache`] -- a SQLite-backed [`CacheStore`](cache::store::CacheStore) with
 //!   per-category TTLs.
-//! - [`search`] — the unified [`SearchService`](search::SearchService) that
+//! - [`search`] -- the unified [`SearchService`](search::SearchService) that
 //!   merges cache and live client, plus legacy/remaster handling.
-//! - [`render`] — AON HTML/markdown into [`ContentBlock`](render::ContentBlock)s
+//! - [`render`] -- AON HTML/markdown into [`ContentBlock`](render::ContentBlock)s
 //!   and `Span`s; colorization is opt-in so non-terminal consumers stay clean.
 //!
 //! TLS uses rustls with the ring provider; [`AonClient::new`](aon::AonClient::new)
