@@ -10,7 +10,7 @@ repository = "https://github.com/jhheider/wayfinder"
 license = "MIT"
 
 [workspace.dependencies]
-wayfinder-core = { path = "crates/wayfinder-core" }
+wayfinder-core = { path = "crates/wayfinder-core", version = "0.1.0" }
 reqwest = { version = "0.13.2", default-features = false, features = ["json", "rustls-no-provider"] }
 # ring provider, not rustls's default aws-lc-rs (external cmake build, huge tree)
 rustls = { version = "0.23", default-features = false, features = ["ring", "logging", "std", "tls12"] }
