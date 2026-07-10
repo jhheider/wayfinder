@@ -13,22 +13,24 @@ jobs:
   release:
     uses: jhheider/rust-ci/.github/workflows/release.yml@v1
     with:
-      # Ship both binaries in each archive. `wf` is first (the "primary"), so
-      # gen-docs generates its man page + completions; wayfinder-mcp needs no
-      # doc flags. All three crates are also published to crates.io below.
+      # Each binary gets its own archive + Homebrew formula. `wf` is first (the
+      # "primary"), so gen-docs generates its man page + completions;
+      # wayfinder-mcp needs no doc flags. The `{bin}` placeholder in each asset
+      # expands per binary (wf-..., wayfinder-mcp-...). All three crates are
+      # also published to crates.io below.
       bin-name: "wf wayfinder-mcp"
       tag: ${{ github.event.inputs.tag }}
       gen-docs: true
       publish-crates: true
       crates: "wayfinder-core wayfinder-cli wayfinder-mcp"
       tap-repo: jhheider/homebrew-tap
-      tap-formula: Formula/wayfinder.rb
+      tap-formula: "Formula/wf.rb Formula/wayfinder-mcp.rb"
       targets: |
         {"include": [
-          {"os":"ubuntu-latest","target":"x86_64-unknown-linux-musl","asset":"wayfinder-linux-x86_64.tar.gz"},
-          {"os":"ubuntu-latest","target":"aarch64-unknown-linux-musl","asset":"wayfinder-linux-aarch64.tar.gz"},
-          {"os":"macos-latest","target":"x86_64-apple-darwin","asset":"wayfinder-macos-x86_64.tar.gz"},
-          {"os":"macos-latest","target":"aarch64-apple-darwin","asset":"wayfinder-macos-aarch64.tar.gz"},
-          {"os":"windows-latest","target":"x86_64-pc-windows-msvc","asset":"wayfinder-windows-x86_64.zip"}
+          {"os":"ubuntu-latest","target":"x86_64-unknown-linux-musl","asset":"{bin}-linux-x86_64.tar.gz"},
+          {"os":"ubuntu-latest","target":"aarch64-unknown-linux-musl","asset":"{bin}-linux-aarch64.tar.gz"},
+          {"os":"macos-latest","target":"x86_64-apple-darwin","asset":"{bin}-macos-x86_64.tar.gz"},
+          {"os":"macos-latest","target":"aarch64-apple-darwin","asset":"{bin}-macos-aarch64.tar.gz"},
+          {"os":"windows-latest","target":"x86_64-pc-windows-msvc","asset":"{bin}-windows-x86_64.zip"}
         ]}
     secrets: inherit

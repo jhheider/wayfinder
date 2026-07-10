@@ -44,15 +44,15 @@ wf cache status
 ```sh
 # the `wf` CLI
 cargo install wayfinder-cli
+brew install jhheider/tap/wf
 
 # the MCP server
 cargo install wayfinder-mcp
-
-# or both binaries at once, prebuilt
-brew install jhheider/tap/wayfinder
+brew install jhheider/tap/wayfinder-mcp
 ```
 
-Prebuilt binaries for macOS, Linux (musl), and Windows are attached to each
+Each binary is packaged separately. Prebuilt archives for macOS, Linux (musl),
+and Windows are attached to every
 [release](https://github.com/jhheider/wayfinder/releases).
 
 ## What's in the box
