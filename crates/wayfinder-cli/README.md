@@ -15,7 +15,7 @@ wf show spell Fireball
 wf categories
 wf --sf2e search class
 wf --format json search spell --name Fireball
-wf cache fetch spell
+wf cache status
 ```
 
 See the [project README](https://github.com/jhheider/wayfinder) for the full

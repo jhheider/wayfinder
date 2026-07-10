@@ -99,8 +99,6 @@ enum Command {
 
 #[derive(Subcommand, Clone)]
 enum CacheAction {
-    /// Fetch an entire category into the local cache
-    Fetch { category: String },
     /// Show cache status
     Status,
     /// Remove expired entries from the cache
@@ -109,7 +107,9 @@ enum CacheAction {
 
 const MAX_INPUT_LEN: usize = 500;
 const MAX_FILTERS: usize = 20;
-const MAX_RESULT_LIMIT: u32 = 500;
+// Hard cap on a single result set. AON's own UI pages in blocks of 50; keeping
+// the ceiling low nudges toward narrowed, filtered queries instead of bulk pulls.
+const MAX_RESULT_LIMIT: u32 = 100;
 
 fn parse_filter(s: &str) -> Result<(String, String), String> {
     let (k, v) = s
@@ -442,20 +442,6 @@ async fn main() -> Result<()> {
             }
         }
         Command::Cache { action } => match action {
-            CacheAction::Fetch { category } => {
-                if category.len() > MAX_INPUT_LEN {
-                    bail!("Category name exceeds maximum length of {MAX_INPUT_LEN} characters.");
-                }
-                let category = cli_resolve_category(&category)?;
-                println!("  {} Fetching {}...", "↓".cyan(), category.bold());
-                let count = svc.fetch_category(&category).await?;
-                println!(
-                    "  {} Cached {} {} documents.",
-                    "✓".green(),
-                    count.to_string().bold(),
-                    category
-                );
-            }
             CacheAction::Purge => {
                 let deleted = svc.purge_expired()?;
                 println!(

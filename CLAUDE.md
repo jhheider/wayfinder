@@ -27,7 +27,7 @@ cargo run -p wayfinder-cli -- show spell Fireball
 cargo run -p wayfinder-cli -- categories
 cargo run -p wayfinder-cli -- --sf2e search class
 cargo run -p wayfinder-cli -- --format json search spell --name Fireball
-cargo run -p wayfinder-cli -- cache fetch spell
+cargo run -p wayfinder-cli -- cache status
 # Drive the MCP server (stdio JSON-RPC):
 cargo run -p wayfinder-mcp
 ```
@@ -88,7 +88,8 @@ packager doc generation (`gen-docs: true`).
 - `aon::parse` -- category resolution, fuzzy suggestion, compound parsing
 - `cache::store` -- `CacheStore` SQLite layer with TTL
 - `render` -- AON HTML/markdown → content blocks / `Vec<Span>`; colorize is opt-in
-- `search` -- unified `SearchService` (cache + client), category fetch
+- `search` -- unified `SearchService` (cache + client); results are cached
+  opportunistically as you query (no bulk category mirroring)
 
 ## wayfinder-mcp notes
 - Keeps its own MCP-tuned ES query builders (`query.rs`: sort, level range,

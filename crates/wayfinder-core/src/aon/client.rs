@@ -62,6 +62,13 @@ impl AonClient {
         // (idempotent -- Err just means a provider is already set).
         let _ = rustls::crypto::ring::default_provider().install_default();
         let http = reqwest::Client::builder()
+            // Identify ourselves to Archives of Nethys (good citizenship; an
+            // unnamed client behind Cloudflare is the first thing throttled).
+            .user_agent(concat!(
+                "wayfinder-core/",
+                env!("CARGO_PKG_VERSION"),
+                " (+https://github.com/jhheider/wayfinder)"
+            ))
             .connect_timeout(Duration::from_secs(10))
             .timeout(Duration::from_secs(30))
             .build()?;

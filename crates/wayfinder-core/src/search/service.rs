@@ -55,45 +55,6 @@ impl<C: SearchClient> SearchService<C> {
         Ok(docs)
     }
 
-    /// Fetch an entire category and store in cache.
-    pub async fn fetch_category(&self, category: &str) -> Result<usize> {
-        let mut all = Vec::new();
-        let mut offset = 0u32;
-        let page_size = 200u32;
-        let max_docs = 50_000u32;
-        loop {
-            let query = SearchQuery::new()
-                .category(category)
-                .size(page_size)
-                .from(offset);
-            let page = self.client.search(&query).await?;
-            let count = page.len();
-            all.extend(page);
-            if (count as u32) < page_size {
-                break;
-            }
-            offset = offset.saturating_add(page_size);
-            if offset >= max_docs {
-                break;
-            }
-        }
-        let docs = all;
-        let mut store = CacheStore::open(&self.cache_path)?;
-
-        let rows: Vec<(String, String, String, String)> = docs
-            .iter()
-            .filter_map(|d| {
-                let id = d.id.clone()?;
-                let cat = d.category.clone()?;
-                let name = d.name.clone()?;
-                let json = serde_json::to_string(d).ok()?;
-                Some((id, cat, name, json))
-            })
-            .collect();
-
-        store.bulk_put(&rows)
-    }
-
     /// Show cache status (category counts).
     pub fn cache_status(&self) -> Result<Vec<(String, i64)>> {
         let store = CacheStore::open(&self.cache_path)?;

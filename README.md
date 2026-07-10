@@ -34,9 +34,9 @@ wf --sf2e search class
 wf --format json search spell --name Fireball
 wf --format md show feat Power_Attack
 
-# warm the local cache for a whole category
-wf cache fetch spell
+# inspect or clean the local cache
 wf cache status
+wf cache purge
 ```
 
 ## Install
@@ -114,8 +114,10 @@ shell `PATH`) from `which wayfinder-mcp` in `claude_desktop_config.json`:
 | Starfinder 2e | `aonsf10` | ~6k | <https://2e.aonsrd.com> |
 
 Both query AON's public Elasticsearch backend at `elasticsearch.aonprd.com`.
-Documents are cached locally (SQLite) with per-category TTLs; use `wf cache` to
-inspect, warm, or purge that store.
+Documents you look up are cached locally (SQLite) with per-category TTLs as a
+side effect of searching; use `wf cache` to inspect or purge that store. The
+tool sends an identifying `User-Agent` and honors `Retry-After` backoff, and it
+does not bulk-mirror AON: results are capped and cached only as you query them.
 
 TLS is rustls with the ring provider -- no OpenSSL or aws-lc, so release builds
 cross-compile cleanly to musl and aarch64.
