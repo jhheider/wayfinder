@@ -3,9 +3,13 @@ use clap::{Parser, Subcommand, ValueEnum};
 use colored::Colorize;
 use std::path::PathBuf;
 
-use wayfinder_core::aon::categories::{CATEGORY_GROUPS, category_icon, filterable_fields};
+use wayfinder_core::aon::categories::{
+    ALL_CATEGORIES, CATEGORY_GROUPS, category_icon, filterable_fields,
+};
 use wayfinder_core::aon::client::GameSystem;
-use wayfinder_core::aon::parse::{CategoryError, parse_compound, resolve_category};
+use wayfinder_core::aon::parse::{
+    CategoryError, normalize_category, parse_compound, resolve_category,
+};
 use wayfinder_core::aon::query::{is_valid_filter_field, is_valid_filter_for_category};
 use wayfinder_core::aon::{AonClient, SearchQuery};
 use wayfinder_core::render::{
@@ -160,6 +164,25 @@ fn game_system(cli: &Cli) -> GameSystem {
     } else {
         GameSystem::Pathfinder
     }
+}
+
+/// Whether `s` names a known AON category (normalizing plural/case).
+fn is_known_category(s: &str) -> bool {
+    ALL_CATEGORIES.contains(&normalize_category(s).as_str())
+}
+
+/// Resolve a `show` query into `(category, name)`, supporting all documented
+/// forms: `spell/Fireball` (slash), `spell Fireball` (first token is a known
+/// category), `Grab an Edge` (multi-word name), and `Fireball` (bare name).
+fn resolve_show_query(query: &[String]) -> (Option<String>, Option<String>) {
+    let joined = query.join(" ");
+    let (cat, name) = parse_compound(&joined);
+    // Only treat a space-separated first token as a category when it actually
+    // is one, so multi-word names like "Grab an Edge" stay intact.
+    if cat.is_none() && query.len() >= 2 && is_known_category(&query[0]) {
+        return (Some(query[0].clone()), Some(query[1..].join(" ")));
+    }
+    (cat, name)
 }
 
 #[tokio::main]
@@ -370,11 +393,10 @@ async fn main() -> Result<()> {
             if query.is_empty() {
                 bail!("show requires a query (e.g. 'spell/fireball' or 'fireball')");
             }
-            let joined = query.join(" ");
-            if joined.len() > MAX_INPUT_LEN {
+            if query.join(" ").len() > MAX_INPUT_LEN {
                 bail!("Show query exceeds maximum length of {MAX_INPUT_LEN} characters.");
             }
-            let (cat, name) = parse_compound(&joined);
+            let (cat, name) = resolve_show_query(&query);
             let category = cat.map(|c| cli_resolve_category(&c)).transpose()?;
             let show_name = name.ok_or_else(|| anyhow::anyhow!("show requires a name"))?;
             let mut results = svc.show(&show_name, category.as_deref()).await?;
@@ -458,4 +480,45 @@ async fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::resolve_show_query;
+
+    fn q(parts: &[&str]) -> Vec<String> {
+        parts.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn slash_form_splits_category_and_name() {
+        assert_eq!(
+            resolve_show_query(&q(&["spell/Fireball"])),
+            (Some("spell".into()), Some("Fireball".into()))
+        );
+    }
+
+    #[test]
+    fn space_form_splits_when_first_token_is_a_category() {
+        assert_eq!(
+            resolve_show_query(&q(&["spell", "Fireball"])),
+            (Some("spell".into()), Some("Fireball".into()))
+        );
+    }
+
+    #[test]
+    fn multi_word_name_without_category_stays_intact() {
+        assert_eq!(
+            resolve_show_query(&q(&["Grab", "an", "Edge"])),
+            (None, Some("Grab an Edge".into()))
+        );
+    }
+
+    #[test]
+    fn bare_name() {
+        assert_eq!(
+            resolve_show_query(&q(&["Fireball"])),
+            (None, Some("Fireball".into()))
+        );
+    }
 }
