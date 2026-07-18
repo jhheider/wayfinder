@@ -1,3 +1,5 @@
+set fallback
+
 tarpaulin := "cargo tarpaulin --config tarpaulin.toml --all-features"
 
 # Show all tasks
