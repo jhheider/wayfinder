@@ -1,9 +1,14 @@
 //! Known AON categories with filterable fields and grouping.
 
-/// All known AON category keys.
+use super::client::GameSystem;
+
+/// All known AON category keys (the union of the PF2e and SF2e index category
+/// sets; see [`PF2E_ONLY`] / [`SF2E_ONLY`] for the ones exclusive to a system).
 pub const ALL_CATEGORIES: &[&str] = &[
     "action",
+    "ammunition",
     "ancestry",
+    "anchor",
     "animal-companion",
     "animal-companion-advanced",
     "animal-companion-specialization",
@@ -24,7 +29,9 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "class-feature",
     "class-kit",
     "class-sample",
+    "computer",
     "condition",
+    "connection",
     "conscious-mind",
     "creature",
     "creature-ability",
@@ -45,10 +52,13 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "element",
     "epithet",
     "equipment",
+    "faction",
     "familiar-ability",
     "familiar-specific",
     "feat",
+    "fighting-style",
     "hazard",
+    "hazard-family",
     "hellknight-order",
     "heritage",
     "hunters-edge",
@@ -61,13 +71,16 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "kingdom-event",
     "kingdom-structure",
     "language",
+    "leadership-style",
     "lesson",
     "methodology",
     "muse",
     "mystery",
     "mythic-calling",
+    "paradox",
     "patron",
     "plane",
+    "planet",
     "practice",
     "racket",
     "relic",
@@ -80,8 +93,11 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "siege-weapon",
     "skill",
     "skill-general-action",
+    "solar-manifestation",
     "source",
+    "specialization",
     "spell",
+    "starship-scene",
     "style",
     "subconscious-mind",
     "tactic",
@@ -96,6 +112,106 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "weapon-group",
     "weather-hazard",
 ];
+
+/// Categories present only in the PF2e index (`aon70`), not in SF2e (`aonsf10`).
+/// Seeded from a live category aggregation of both indices (2026-07-10).
+/// Everything in [`ALL_CATEGORIES`] that is in neither this list nor
+/// [`SF2E_ONLY`] is shared by both game systems.
+pub const PF2E_ONLY: &[&str] = &[
+    "animal-companion",
+    "animal-companion-advanced",
+    "animal-companion-specialization",
+    "animal-companion-unique",
+    "apparition",
+    "arcane-school",
+    "arcane-thesis",
+    "article",
+    "bloodline",
+    "campsite-meal",
+    "cause",
+    "class-kit",
+    "class-sample",
+    "conscious-mind",
+    "creature-theme-template",
+    "cult-activity",
+    "deviant-ability-classification",
+    "doctrine",
+    "draconic-exemplar",
+    "druidic-order",
+    "eidolon",
+    "element",
+    "epithet",
+    "familiar-ability",
+    "familiar-specific",
+    "hellknight-order",
+    "hunters-edge",
+    "hybrid-study",
+    "ikon",
+    "implement",
+    "innovation",
+    "instinct",
+    "kingdom-event",
+    "kingdom-structure",
+    "lesson",
+    "methodology",
+    "muse",
+    "mystery",
+    "mythic-calling",
+    "patron",
+    "practice",
+    "racket",
+    "relic",
+    "research-field",
+    "set-relic",
+    "siege-weapon",
+    "style",
+    "subconscious-mind",
+    "tactic",
+    "tenet",
+    "warfare-army",
+    "warfare-tactic",
+    "way",
+    "weather-hazard",
+];
+
+/// Categories present only in the SF2e index (`aonsf10`), not in PF2e (`aon70`).
+/// Seeded from the same 2026-07-10 aggregation as [`PF2E_ONLY`].
+pub const SF2E_ONLY: &[&str] = &[
+    "ammunition",
+    "anchor",
+    "computer",
+    "connection",
+    "faction",
+    "fighting-style",
+    "hazard-family",
+    "leadership-style",
+    "paradox",
+    "planet",
+    "solar-manifestation",
+    "specialization",
+    "starship-scene",
+];
+
+/// Whether `category` exists in the given game system's index. Unknown
+/// categories (not in [`ALL_CATEGORIES`]) return `false`.
+pub fn category_in_system(category: &str, system: GameSystem) -> bool {
+    if !ALL_CATEGORIES.contains(&category) {
+        return false;
+    }
+    match system {
+        GameSystem::Pathfinder => !SF2E_ONLY.contains(&category),
+        GameSystem::Starfinder => !PF2E_ONLY.contains(&category),
+    }
+}
+
+/// The categories available in the given game system, sorted.
+pub fn categories_for(system: GameSystem) -> Vec<&'static str> {
+    ALL_CATEGORIES
+        .iter()
+        .copied()
+        .filter(|c| category_in_system(c, system))
+        .collect()
+}
 
 /// Filterable fields for a category (excludes common metadata).
 /// Returns `None` for unknown categories.
@@ -231,11 +347,13 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
     CategoryGroup {
         name: "Class Options",
         members: &[
+            "anchor",
             "apparition",
             "arcane-school",
             "arcane-thesis",
             "bloodline",
             "cause",
+            "connection",
             "conscious-mind",
             "doctrine",
             "draconic-exemplar",
@@ -243,20 +361,25 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
             "eidolon",
             "element",
             "epithet",
+            "fighting-style",
             "hunters-edge",
             "hybrid-study",
             "ikon",
             "implement",
             "innovation",
             "instinct",
+            "leadership-style",
             "lesson",
             "methodology",
             "muse",
             "mystery",
+            "paradox",
             "patron",
             "practice",
             "racket",
             "research-field",
+            "solar-manifestation",
+            "specialization",
             "style",
             "subconscious-mind",
             "tactic",
@@ -271,8 +394,10 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
         name: "Equipment",
         members: &[
             "equipment",
+            "ammunition",
             "armor",
             "armor-group",
+            "computer",
             "shield",
             "weapon",
             "weapon-group",
@@ -306,9 +431,12 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
             "condition",
             "disease",
             "curse",
+            "faction",
             "hazard",
+            "hazard-family",
             "language",
             "plane",
+            "planet",
             "relic",
             "set-relic",
             "skill",
@@ -332,6 +460,7 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
             "kingdom-structure",
             "mythic-calling",
             "sidebar",
+            "starship-scene",
             "source",
             "tenet",
             "warfare-army",

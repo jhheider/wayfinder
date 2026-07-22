@@ -4,7 +4,7 @@ use colored::Colorize;
 use std::path::PathBuf;
 
 use wayfinder_core::aon::categories::{
-    ALL_CATEGORIES, CATEGORY_GROUPS, category_icon, filterable_fields,
+    ALL_CATEGORIES, CATEGORY_GROUPS, category_icon, category_in_system, filterable_fields,
 };
 use wayfinder_core::aon::client::GameSystem;
 use wayfinder_core::aon::parse::{
@@ -239,8 +239,17 @@ async fn main() -> Result<()> {
         Command::Categories => {
             println!("{} Categories:\n", sys_label);
             for group in CATEGORY_GROUPS {
+                let members: Vec<&str> = group
+                    .members
+                    .iter()
+                    .copied()
+                    .filter(|&cat| category_in_system(cat, system))
+                    .collect();
+                if members.is_empty() {
+                    continue;
+                }
                 println!("{}:", group.name.bold().underline());
-                for &cat in group.members {
+                for cat in members {
                     let icon = category_icon(cat);
                     let filters = match filterable_fields(cat) {
                         Some(f) => format!(" {}", format!("({} filters)", f.len()).dimmed()),

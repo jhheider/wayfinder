@@ -58,6 +58,49 @@ fn categories_lists_groups_offline() {
 }
 
 #[test]
+fn pf2e_categories_output_is_pf2e_only() {
+    // The rendered `wf categories` list must show PF2e-only categories and
+    // hide SF2e-only ones (the reverse of the SF2e conflation bug).
+    let out = run_wf("cats-pf", None, &["categories"]);
+    for pf in ["hellknight-order", "kingdom-event", "eidolon", "bloodline"] {
+        assert!(out.contains(pf), "PF2e list missing '{pf}':\n{out}");
+    }
+    for sf in [
+        "starship-scene",
+        "solar-manifestation",
+        "planet",
+        "computer",
+    ] {
+        assert!(
+            !out.contains(sf),
+            "PF2e list leaked SF2e-only '{sf}':\n{out}"
+        );
+    }
+}
+
+#[test]
+fn sf2e_categories_output_excludes_pf2e_only() {
+    // The original bug: `wf --sf2e categories` printed the merged list, so
+    // PF2e-only categories appeared under the SF2e header. Assert against the
+    // real rendered output that they no longer do, and SF2e-only ones show.
+    let out = run_wf("cats-sf", None, &["--sf2e", "categories"]);
+    for pf in ["hellknight-order", "kingdom-event", "eidolon", "bloodline"] {
+        assert!(
+            !out.contains(pf),
+            "SF2e list leaked PF2e-only '{pf}':\n{out}"
+        );
+    }
+    for sf in [
+        "starship-scene",
+        "solar-manifestation",
+        "planet",
+        "computer",
+    ] {
+        assert!(out.contains(sf), "SF2e list missing '{sf}':\n{out}");
+    }
+}
+
+#[test]
 fn fields_lists_a_category_offline() {
     let out = run_wf("fields", None, &["fields", "deity"]);
     assert!(out.to_lowercase().contains("deity"), "{out}");
