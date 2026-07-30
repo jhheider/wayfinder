@@ -14,6 +14,25 @@ categories = ["command-line-utilities", "api-bindings"]
 name = "wayfinder-mcp"
 path = "src/main.rs"
 
+# rust-ci's release.yml ships assets as `{bin}-{os}-{arch}.{ext}` (no
+# version, no full target triple), which matches none of cargo-binstall's
+# default guess templates, so `cargo binstall wayfinder-mcp` silently fell
+# back to compiling from source. archive-suffix resolves against every
+# extension binstall knows for the given pkg-fmt (both .tgz and .tar.gz for
+# Tgz), so this matches the actual .tar.gz assets without hardcoding it.
+#
+# { name } (crate name), not { bin }: binstall only resolves { bin } later,
+# in bin-dir, after a specific binary is known - it isn't available when
+# pkg-url renders (confirmed the hard way on edikt 0.2.7). { name } happens
+# to equal the binary name here.
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ os-name }-{ target-arch }{ archive-suffix }"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
+
 [dependencies]
 wayfinder-core = { workspace = true }
 tokio = { workspace = true }

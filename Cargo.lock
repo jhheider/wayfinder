@@ -1940,7 +1940,7 @@ dependencies = [
 
 [[package]]
 name = "wayfinder-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -1956,7 +1956,7 @@ dependencies = [
 
 [[package]]
 name = "wayfinder-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "colored",
  "html-escape",
@@ -1973,7 +1973,7 @@ dependencies = [
 
 [[package]]
 name = "wayfinder-mcp"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",

@@ -14,6 +14,27 @@ categories = ["command-line-utilities", "games"]
 name = "wf"
 path = "src/main.rs"
 
+# rust-ci's release.yml ships assets as `{bin}-{os}-{arch}.{ext}` (no
+# version, no full target triple), which matches none of cargo-binstall's
+# default guess templates, so `cargo binstall wf` (this crate's binary name -
+# note the crate is `wayfinder-cli`, not `wf`) silently fell back to
+# compiling from source. archive-suffix resolves against every extension
+# binstall knows for the given pkg-fmt (both .tgz and .tar.gz for Tgz), so
+# this matches the actual .tar.gz assets without hardcoding it.
+#
+# The literal binary name `wf`, not { name } (which would resolve to the
+# crate name, wayfinder-cli - wrong) and not { bin } (which binstall only
+# resolves later, in bin-dir, after a specific binary is already known - it
+# isn't available when pkg-url renders; confirmed the hard way on edikt
+# 0.2.7).
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/wf-{ os-name }-{ target-arch }{ archive-suffix }"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
+
 [dependencies]
 wayfinder-core = { workspace = true }
 clap = { workspace = true }
