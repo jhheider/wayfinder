@@ -48,7 +48,9 @@ fn run_wf(tag: &str, endpoint: Option<&str>, args: &[&str]) -> String {
 
 #[test]
 fn version_flag() {
-    assert!(run_wf("version", None, &["--version"]).contains("wf 0.1.0"));
+    let want = concat!("wf ", env!("CARGO_PKG_VERSION"));
+    let out = run_wf("version", None, &["--version"]);
+    assert!(out.contains(want), "wanted {want:?} in {out:?}");
 }
 
 #[test]
