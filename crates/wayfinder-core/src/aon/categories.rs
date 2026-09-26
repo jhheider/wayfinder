@@ -3,7 +3,9 @@
 /// All known AON category keys.
 pub const ALL_CATEGORIES: &[&str] = &[
     "action",
+    "ammunition",
     "ancestry",
+    "anchor",
     "animal-companion",
     "animal-companion-advanced",
     "animal-companion-specialization",
@@ -24,7 +26,9 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "class-feature",
     "class-kit",
     "class-sample",
+    "computer",
     "condition",
+    "connection",
     "conscious-mind",
     "creature",
     "creature-ability",
@@ -45,10 +49,16 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "element",
     "epithet",
     "equipment",
+    "faction",
     "familiar-ability",
     "familiar-specific",
+    "fatal-method",
     "feat",
+    "fighting-style",
+    "follower",
+    "grim-fascination",
     "hazard",
+    "hazard-family",
     "hellknight-order",
     "heritage",
     "hunters-edge",
@@ -61,27 +71,34 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "kingdom-event",
     "kingdom-structure",
     "language",
+    "leadership-style",
     "lesson",
     "methodology",
     "muse",
     "mystery",
     "mythic-calling",
+    "paradox",
     "patron",
     "plane",
+    "planet",
     "practice",
     "racket",
     "relic",
     "research-field",
     "ritual",
     "rules",
+    "runesmith-rune",
     "set-relic",
     "shield",
     "sidebar",
     "siege-weapon",
     "skill",
     "skill-general-action",
+    "solar-manifestation",
     "source",
+    "specialization",
     "spell",
+    "starship-scene",
     "style",
     "subconscious-mind",
     "tactic",
@@ -261,6 +278,15 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
             "subconscious-mind",
             "tactic",
             "way",
+            "fatal-method",
+            "grim-fascination",
+            "runesmith-rune",
+            "connection",
+            "fighting-style",
+            "leadership-style",
+            "paradox",
+            "solar-manifestation",
+            "specialization",
         ],
     },
     CategoryGroup {
@@ -278,6 +304,8 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
             "weapon-group",
             "item-bonus",
             "siege-weapon",
+            "ammunition",
+            "computer",
         ],
     },
     CategoryGroup {
@@ -294,6 +322,7 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
             "animal-companion-unique",
             "familiar-ability",
             "familiar-specific",
+            "follower",
         ],
     },
     CategoryGroup {
@@ -315,6 +344,9 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
             "skill-general-action",
             "trait",
             "vehicle",
+            "faction",
+            "planet",
+            "hazard-family",
         ],
     },
     CategoryGroup {
@@ -322,7 +354,8 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
         members: &[
             "rules",
             "article",
-            "background",
+            "anchor",
+            "starship-scene",
             "campsite-meal",
             "category-page",
             "cult-activity",
@@ -344,26 +377,32 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
 /// Find the closest matching category for a given input.
 /// Returns `None` if no reasonable match exists.
 pub fn suggest_category(input: &str) -> Option<&'static str> {
+    suggest_from(input, ALL_CATEGORIES).copied()
+}
+
+/// Find the closest match for `input` among `candidates` (exact, then a unique
+/// prefix, then a unique substring, then edit distance ≤ 3).
+pub fn suggest_from<'a, S: AsRef<str>>(input: &str, candidates: &'a [S]) -> Option<&'a S> {
     let input = input.to_lowercase();
 
     // Exact match
-    if let Some(&cat) = ALL_CATEGORIES.iter().find(|&&c| c == input) {
+    if let Some(cat) = candidates.iter().find(|c| c.as_ref() == input) {
         return Some(cat);
     }
 
     // Prefix match
-    let prefix_matches: Vec<&&str> = ALL_CATEGORIES
+    let prefix_matches: Vec<&S> = candidates
         .iter()
-        .filter(|&&c| c.starts_with(&input))
+        .filter(|c| c.as_ref().starts_with(&input))
         .collect();
     if prefix_matches.len() == 1 {
         return Some(prefix_matches[0]);
     }
 
     // Substring match
-    let substr_matches: Vec<&&str> = ALL_CATEGORIES
+    let substr_matches: Vec<&S> = candidates
         .iter()
-        .filter(|&&c| c.contains(input.as_str()))
+        .filter(|c| c.as_ref().contains(input.as_str()))
         .collect();
     if substr_matches.len() == 1 {
         return Some(substr_matches[0]);
@@ -372,8 +411,8 @@ pub fn suggest_category(input: &str) -> Option<&'static str> {
     // Edit distance (simple Levenshtein)
     let mut best = None;
     let mut best_dist = usize::MAX;
-    for &cat in ALL_CATEGORIES {
-        let d = edit_distance(&input, cat);
+    for cat in candidates {
+        let d = edit_distance(&input, cat.as_ref());
         if d < best_dist {
             best_dist = d;
             best = Some(cat);

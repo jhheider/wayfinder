@@ -45,14 +45,30 @@ impl std::error::Error for CategoryError {}
 ///
 /// Normalizes, checks for exact match, then tries fuzzy suggestion.
 pub fn resolve_category(input: &str) -> Result<String, CategoryError> {
-    let normalized = normalize_category(input);
-    if super::categories::ALL_CATEGORIES.contains(&normalized.as_str()) {
-        return Ok(normalized);
+    resolve_category_in(input, super::categories::ALL_CATEGORIES)
+}
+
+/// Resolve a category string against a caller-supplied set of categories (e.g.
+/// the live list for one game), like [`resolve_category`].
+///
+/// The input is matched as given (case-insensitively) before it is
+/// de-pluralized, so categories that end in `s` (`rules`) resolve to
+/// themselves.
+pub fn resolve_category_in<S: AsRef<str>>(
+    input: &str,
+    known: &[S],
+) -> Result<String, CategoryError> {
+    let lower = input.trim().to_lowercase();
+    let normalized = normalize_category(&lower);
+    for candidate in [&lower, &normalized] {
+        if known.iter().any(|k| k.as_ref() == candidate) {
+            return Ok(candidate.clone());
+        }
     }
-    if let Some(suggestion) = super::categories::suggest_category(&normalized) {
+    if let Some(suggestion) = super::categories::suggest_from(&normalized, known) {
         return Err(CategoryError::Suggested {
             input: input.to_string(),
-            suggestion: suggestion.to_string(),
+            suggestion: suggestion.as_ref().to_string(),
         });
     }
     Err(CategoryError::Unknown(input.to_string()))

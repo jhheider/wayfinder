@@ -58,3 +58,14 @@ fn all_group_members_are_valid_categories() {
         }
     }
 }
+
+#[test]
+fn every_category_is_in_a_group() {
+    // `wf categories` lists groups only, so an ungrouped category is invisible.
+    for &cat in ALL_CATEGORIES {
+        assert!(
+            CATEGORY_GROUPS.iter().any(|g| g.members.contains(&cat)),
+            "category '{cat}' is not in any CATEGORY_GROUPS entry"
+        );
+    }
+}
