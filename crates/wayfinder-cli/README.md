@@ -10,11 +10,12 @@ cargo install wayfinder-cli      # installs the `wf` binary
 ```
 
 ```sh
-wf search deity -f domain=Dragon
+wf search deity/ -f domain=Dragon
+wf search spell/ -t fire --max-level 3 --source "Player Core"
 wf show spell Fireball
 wf categories
-wf --sf2e search class
-wf --format json search spell --name Fireball
+wf --sf2e search class/
+wf --format json search spell/Fireball
 wf cache status
 ```
 

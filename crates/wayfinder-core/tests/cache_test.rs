@@ -1,114 +1,82 @@
-use wayfinder_core::cache::CacheStore;
+use serde_json::json;
+use std::time::Duration;
+use wayfinder_core::cache::ResponseCache;
 
-#[test]
-fn roundtrip_put_get() {
+fn open() -> (tempfile::TempDir, ResponseCache) {
     let dir = tempfile::tempdir().unwrap();
-    let path = dir.path().join("test.db");
-    let store = CacheStore::open(&path).unwrap();
-
-    store
-        .put("1", "deity", "Apsu", r#"{"name":"Apsu"}"#)
-        .unwrap();
-    let data = store.get("1").unwrap();
-    assert_eq!(data.unwrap(), r#"{"name":"Apsu"}"#);
+    let cache = ResponseCache::open(&dir.path().join("nested/cache.db")).unwrap();
+    (dir, cache)
 }
 
 #[test]
-fn get_by_category() {
-    let dir = tempfile::tempdir().unwrap();
-    let path = dir.path().join("test.db");
-    let store = CacheStore::open(&path).unwrap();
-
-    store
-        .put("1", "deity", "Apsu", r#"{"name":"Apsu"}"#)
-        .unwrap();
-    store
-        .put("2", "deity", "Dahak", r#"{"name":"Dahak"}"#)
-        .unwrap();
-    store
-        .put("3", "spell", "Fireball", r#"{"name":"Fireball"}"#)
-        .unwrap();
-
-    let deities = store.get_by_category("deity").unwrap();
-    assert_eq!(deities.len(), 2);
+fn roundtrip_and_status_per_game() {
+    let (_dir, cache) = open();
+    assert_eq!(cache.get("k"), None);
+    cache.put("k", "PF2e", &json!({"hits": 1})).unwrap();
+    cache.put("k2", "SF2e", &json!({})).unwrap();
+    cache.put("k3", "SF2e", &json!({})).unwrap();
+    assert_eq!(cache.get("k"), Some(json!({"hits": 1})));
+    assert_eq!(
+        cache.status().unwrap(),
+        vec![("PF2e".to_string(), 1), ("SF2e".to_string(), 2)]
+    );
 }
 
 #[test]
-fn cache_ttl_expiration() {
-    let dir = tempfile::tempdir().unwrap();
-    let path = dir.path().join("test.db");
-    let mut store = CacheStore::open(&path).unwrap();
-
-    store
-        .put("1", "deity", "Apsu", r#"{"name":"Apsu"}"#)
-        .unwrap();
-    store.set_ttl(0);
-    let data = store.get("1").unwrap();
-    assert!(data.is_none());
+fn put_replaces() {
+    let (_dir, cache) = open();
+    cache.put("k", "PF2e", &json!(1)).unwrap();
+    cache.put("k", "PF2e", &json!(2)).unwrap();
+    assert_eq!(cache.get("k"), Some(json!(2)));
 }
 
 #[test]
-fn cache_get_by_name_no_wildcard_leak() {
-    let dir = tempfile::tempdir().unwrap();
-    let path = dir.path().join("test.db");
-    let store = CacheStore::open(&path).unwrap();
-
-    store
-        .put("1", "spell", "Fireball", r#"{"name":"Fireball"}"#)
-        .unwrap();
-
-    // Wildcard characters should not match anything
-    let results = store.get_by_name("%", None).unwrap();
-    assert!(results.is_empty(), "% should not match any documents");
-
-    let results = store.get_by_name("_ireball", None).unwrap();
-    assert!(results.is_empty(), "_ should not act as wildcard");
-
-    // Exact case-insensitive match still works
-    let results = store.get_by_name("fireball", None).unwrap();
-    assert_eq!(results.len(), 1);
-
-    // Literal % in a document name is retrievable by exact match
-    store
-        .put("2", "spell", "Fire%Ball", r#"{"name":"Fire%Ball"}"#)
-        .unwrap();
-    let results = store.get_by_name("Fire%Ball", None).unwrap();
-    assert_eq!(results.len(), 1, "literal % in name should match exactly");
+fn expired_entries_miss_and_purge() {
+    let (_dir, cache) = open();
+    let cache = cache.with_ttl(Duration::ZERO);
+    cache.put("k", "PF2e", &json!(1)).unwrap();
+    assert_eq!(cache.get("k"), None);
+    assert!(cache.status().unwrap().is_empty());
+    assert_eq!(cache.purge_expired().unwrap(), 1);
 }
 
 #[test]
-fn cache_purge_expired() {
-    let dir = tempfile::tempdir().unwrap();
-    let path = dir.path().join("test.db");
-    let mut store = CacheStore::open(&path).unwrap();
-
-    store
-        .put("1", "deity", "Apsu", r#"{"name":"Apsu"}"#)
-        .unwrap();
-    store.set_ttl(0); // everything is now expired
-    let deleted = store.purge_expired().unwrap();
-    assert_eq!(deleted, 1);
-
-    // Verify the document is gone
-    store.set_ttl(86400 * 7);
-    let status = store.status().unwrap();
-    assert!(status.is_empty());
+fn clear_removes_everything() {
+    let (_dir, cache) = open();
+    cache.put("a", "PF2e", &json!(1)).unwrap();
+    cache.put("b", "PF2e", &json!(1)).unwrap();
+    assert_eq!(cache.clear().unwrap(), 2);
+    assert_eq!(cache.get("a"), None);
 }
 
 #[test]
-fn bulk_put_and_status() {
+fn reopening_drops_the_old_documents_table() {
     let dir = tempfile::tempdir().unwrap();
-    let path = dir.path().join("test.db");
-    let mut store = CacheStore::open(&path).unwrap();
+    let path = dir.path().join("c.db");
+    {
+        let conn = rusqlite::Connection::open(&path).unwrap();
+        conn.execute_batch("CREATE TABLE documents (id TEXT);")
+            .unwrap();
+    }
+    ResponseCache::open(&path).unwrap();
+    let conn = rusqlite::Connection::open(&path).unwrap();
+    let n: i64 = conn
+        .query_row(
+            "SELECT COUNT(*) FROM sqlite_master WHERE name = 'documents'",
+            [],
+            |r| r.get(0),
+        )
+        .unwrap();
+    assert_eq!(n, 0);
+}
 
-    let docs = vec![
-        ("1".into(), "deity".into(), "Apsu".into(), "{}".into()),
-        ("2".into(), "deity".into(), "Dahak".into(), "{}".into()),
-    ];
-    let count = store.bulk_put(&docs).unwrap();
-    assert_eq!(count, 2);
-
-    let status = store.status().unwrap();
-    assert_eq!(status.len(), 1);
-    assert_eq!(status[0], ("deity".to_string(), 2));
+#[test]
+fn two_handles_share_one_file() {
+    // The CLI and the MCP server open the same cache concurrently.
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("c.db");
+    let a = ResponseCache::open(&path).unwrap();
+    let b = ResponseCache::open(&path).unwrap();
+    a.put("k", "PF2e", &json!("from a")).unwrap();
+    assert_eq!(b.get("k"), Some(json!("from a")));
 }

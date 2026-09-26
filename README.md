@@ -16,9 +16,10 @@ without leaving the shell.
 # broad search across everything
 wf search fireball
 
-# scoped to a category, with filters
-wf search deity -f domain=Dragon
-wf search spell --name Fireball --level 3
+# scoped to a category ("category/" alone lists it), with filters
+wf search deity/ -f domain=Dragon
+wf search spell/ -t fire --min-level 3 --max-level 5 --source "Player Core"
+wf search feat/ -t fighter --level 1 --sort name --offset 50
 
 # show a full document, rendered for the terminal
 wf show spell Fireball
@@ -28,15 +29,19 @@ wf categories
 wf fields deity
 
 # Starfinder 2e instead of Pathfinder 2e
-wf --sf2e search class
+wf --sf2e search class/
+
+# pre-remaster (legacy) versions instead of remastered ones
+wf --legacy show spell Heal
 
 # raw JSON for scripting, or raw AON markdown
-wf --format json search spell --name Fireball
+wf --format json search spell/Fireball
 wf --format md show feat Power_Attack
 
-# inspect or clean the local cache
+# inspect or clean the local response cache
 wf cache status
-wf cache purge
+wf cache purge   # expired entries
+wf cache clear   # everything
 ```
 
 ## Install
@@ -69,8 +74,9 @@ This is a Cargo workspace with three crates -- one AON client library and two
 frontends:
 
 - **[`wayfinder-core`](crates/wayfinder-core)** -- the library: AON Elasticsearch
-  client, SQLite cache with TTLs, unified search, and an HTML/markdown renderer.
-  Depend on it directly to build your own AON-backed tools.
+  client, the `Wayfinder` search/lookup service both frontends share, a SQLite
+  response cache, and an HTML/markdown renderer. Depend on it directly to build
+  your own AON-backed tools.
 - **[`wayfinder-cli`](crates/wayfinder-cli)** -- the `wf` binary built on top of it.
 - **[`wayfinder-mcp`](crates/wayfinder-mcp)** -- an [MCP](https://modelcontextprotocol.io)
   server exposing AON data (`search`, `get`, `list_categories`) to LLM tools like
@@ -114,10 +120,15 @@ shell `PATH`) from `which wayfinder-mcp` in `claude_desktop_config.json`:
 | Starfinder 2e | `aonsf10` | ~6k | <https://2e.aonsrd.com> |
 
 Both query AON's public Elasticsearch backend at `elasticsearch.aonprd.com`.
-Documents you look up are cached locally (SQLite) with per-category TTLs as a
-side effect of searching; use `wf cache` to inspect or purge that store. The
-tool sends an identifying `User-Agent` and honors `Retry-After` backoff, and it
+Every response is cached locally (SQLite) for a day, keyed by the exact
+request, and `wf` and `wayfinder-mcp` share the one cache file, so a repeat
+question never reaches Nethys twice. `wf cache` inspects or empties it; set
+`WAYFINDER_CACHE` to another file path, or to `off` to disable it. The tool
+sends an identifying `User-Agent` and honors `Retry-After` backoff, and it
 does not bulk-mirror AON: results are capped and cached only as you query them.
+
+Results follow the Remaster: an entry it replaced shows as its remastered
+version (`--legacy` in `wf`, `legacy: true` in the MCP tools, for the other).
 
 TLS is rustls with the ring provider -- no OpenSSL or aws-lc, so release builds
 cross-compile cleanly to musl and aarch64.

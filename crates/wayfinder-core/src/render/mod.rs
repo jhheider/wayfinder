@@ -5,5 +5,5 @@ pub mod terminal;
 
 pub use colored::{display_short_colored, rarity_colored, render_spans_colored};
 pub use content::{ContentBlock, InlineContent, parse_content};
-pub use markdown::render_markdown;
+pub use markdown::{render_markdown, render_markdown_unlinked};
 pub use terminal::{Span, action_icon, render_spans};

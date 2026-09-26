@@ -4,18 +4,28 @@ use super::content::{ContentBlock, InlineContent};
 
 /// Render content blocks to clean markdown text.
 pub fn render_markdown(blocks: &[ContentBlock]) -> String {
+    render(blocks, true)
+}
+
+/// Like [`render_markdown`], but links are reduced to their text. Suits LLM
+/// consumers: AON links every trait and term, which costs tokens, and a model
+/// can look any of them up by name.
+pub fn render_markdown_unlinked(blocks: &[ContentBlock]) -> String {
+    render(blocks, false)
+}
+
+fn render(blocks: &[ContentBlock], links: bool) -> String {
     let mut out = String::new();
     for (i, block) in blocks.iter().enumerate() {
         if i > 0 {
             out.push('\n');
         }
-        render_block(&mut out, block, 0);
+        render_block(&mut out, block, links);
     }
     out.trim().to_string()
 }
 
-#[allow(clippy::only_used_in_recursion)]
-fn render_block(out: &mut String, block: &ContentBlock, depth: usize) {
+fn render_block(out: &mut String, block: &ContentBlock, links: bool) {
     match block {
         ContentBlock::Title {
             level,
@@ -35,18 +45,18 @@ fn render_block(out: &mut String, block: &ContentBlock, depth: usize) {
             out.push('\n');
         }
         ContentBlock::Paragraph { content } => {
-            render_inlines(out, content);
+            render_inlines(out, content, links);
             out.push('\n');
         }
         ContentBlock::KeyValue { key, value } => {
             out.push_str(&format!("**{key}** "));
-            render_inlines(out, value);
+            render_inlines(out, value, links);
             out.push('\n');
         }
         ContentBlock::List { items } => {
             for item in items {
                 out.push_str("- ");
-                render_inlines(out, item);
+                render_inlines(out, item, links);
                 out.push('\n');
             }
         }
@@ -66,7 +76,7 @@ fn render_block(out: &mut String, block: &ContentBlock, depth: usize) {
             }
             for inner in content {
                 out.push_str("> ");
-                render_block(out, inner, depth + 1);
+                render_block(out, inner, links);
             }
             out.push('\n');
         }
@@ -76,7 +86,7 @@ fn render_block(out: &mut String, block: &ContentBlock, depth: usize) {
     }
 }
 
-fn render_inlines(out: &mut String, inlines: &[InlineContent]) {
+fn render_inlines(out: &mut String, inlines: &[InlineContent], links: bool) {
     for ic in inlines {
         match ic {
             InlineContent::Text { text } => out.push_str(text),
@@ -87,7 +97,7 @@ fn render_inlines(out: &mut String, inlines: &[InlineContent]) {
                 out.push_str(&format!("_{text}_"));
             }
             InlineContent::Link { text, url } => {
-                if url.is_empty() {
+                if url.is_empty() || !links {
                     out.push_str(text);
                 } else {
                     out.push_str(&format!("[{text}]({url})"));

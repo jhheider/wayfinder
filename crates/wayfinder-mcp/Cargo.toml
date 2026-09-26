@@ -1,6 +1,6 @@
 [package]
 name = "wayfinder-mcp"
-version = "0.1.1"
+version = "0.2.0"
 edition.workspace = true
 authors.workspace = true
 repository.workspace = true
@@ -34,7 +34,7 @@ pkg-fmt = "tgz"
 pkg-fmt = "zip"
 
 [dependencies]
-wayfinder-core = { workspace = true }
+wayfinder-core = { workspace = true , features = ["schemars"] }
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

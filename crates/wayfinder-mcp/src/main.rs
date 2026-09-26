@@ -6,7 +6,6 @@
 
 mod format;
 mod params;
-mod query;
 mod server;
 
 use anyhow::Context;

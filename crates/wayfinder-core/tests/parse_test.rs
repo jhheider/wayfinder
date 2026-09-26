@@ -1,5 +1,5 @@
 use wayfinder_core::aon::parse::{
-    CategoryError, normalize_category, parse_compound, resolve_category,
+    CategoryError, normalize_category, parse_compound, resolve_category, resolve_category_in,
 };
 
 #[test]
@@ -72,4 +72,32 @@ fn resolve_category_suggests_close_match() {
 fn resolve_category_unknown() {
     let result = resolve_category("zzzznotacategory");
     assert!(matches!(result, Err(CategoryError::Unknown(_))));
+}
+
+#[test]
+fn resolve_category_keeps_categories_ending_in_s() {
+    // Regression: "rules" was de-pluralized to "rule" before the lookup, so
+    // `wf search rules/flanking` warned "Unknown category 'rules', using 'rules'".
+    assert_eq!(resolve_category("rules"), Ok("rules".to_string()));
+    assert_eq!(resolve_category("Rules"), Ok("rules".to_string()));
+}
+
+#[test]
+fn resolve_category_in_uses_the_supplied_set() {
+    let live = ["starship-scene", "spell"];
+    assert_eq!(
+        resolve_category_in("Starship-Scenes", &live),
+        Ok("starship-scene".to_string())
+    );
+    assert_eq!(
+        resolve_category_in("spel", &live),
+        Err(CategoryError::Suggested {
+            input: "spel".to_string(),
+            suggestion: "spell".to_string()
+        })
+    );
+    assert!(matches!(
+        resolve_category_in("deity", &live),
+        Err(CategoryError::Unknown(_))
+    ));
 }

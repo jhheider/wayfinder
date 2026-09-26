@@ -1,15 +1,8 @@
 use serde_json::Value;
-use std::future::Future;
 use std::time::Duration;
 
 use super::models::Document;
-use super::query::SearchQuery;
 use crate::error::{Error, Result};
-
-/// Trait for searching AON documents, enabling mock implementations for tests.
-pub trait SearchClient: Send + Sync {
-    fn search(&self, query: &SearchQuery) -> impl Future<Output = Result<Vec<Document>>> + Send;
-}
 
 /// Game system endpoints.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -49,6 +42,28 @@ impl GameSystem {
     }
 }
 
+/// Parses a game name case-insensitively: `pf2e`/`pathfinder`/`aonprd` or
+/// `sf2e`/`starfinder`/`aonsrd` (and a few other common spellings).
+impl std::str::FromStr for GameSystem {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "pf2e" | "pf" | "pathfinder" | "pathfinder2e" | "aonprd" => Ok(Self::Pathfinder),
+            "sf2e" | "sf" | "starfinder" | "starfinder2e" | "aonsf" | "aonsrd" => {
+                Ok(Self::Starfinder)
+            }
+            other => Err(format!(
+                "unknown game {other:?}; expected \"pf2e\" (Pathfinder 2e) or \"sf2e\" (Starfinder 2e)"
+            )),
+        }
+    }
+}
+
+/// Environment variable that points clients built by [`AonClient::from_env`]
+/// at a different `_search` endpoint (a mirror, proxy, or test server).
+pub const ENDPOINT_ENV: &str = "WAYFINDER_AON_ENDPOINT";
+
 /// HTTP client for AON's Elasticsearch backend.
 #[derive(Clone)]
 pub struct AonClient {
@@ -60,6 +75,15 @@ pub struct AonClient {
 impl AonClient {
     pub fn new(system: GameSystem) -> Result<Self> {
         Self::with_endpoint(system, system.endpoint())
+    }
+
+    /// Like [`AonClient::new`], but honors [`ENDPOINT_ENV`] when it is set and
+    /// non-empty.
+    pub fn from_env(system: GameSystem) -> Result<Self> {
+        match std::env::var(ENDPOINT_ENV) {
+            Ok(ep) if !ep.trim().is_empty() => Self::with_endpoint(system, ep),
+            _ => Self::new(system),
+        }
     }
 
     /// Construct a client pointed at a specific `_search` endpoint instead of
@@ -86,16 +110,14 @@ impl AonClient {
         })
     }
 
-    /// Execute a search query and return parsed documents.
-    pub async fn search(&self, query: &SearchQuery) -> Result<Vec<Document>> {
-        let body = query.build();
-        let raw = self.search_raw(&body).await?;
-        parse_documents(&raw)
+    /// The `_search` endpoint this client posts to.
+    pub fn endpoint(&self) -> &str {
+        &self.endpoint
     }
 
     /// Execute a raw JSON query body, returning the full response. Retries on
     /// 429/503 with exponential backoff (honoring `Retry-After` when present),
-    /// up to [`MAX_ATTEMPTS`] total requests.
+    /// up to three requests in all.
     pub async fn search_raw(&self, body: &Value) -> Result<Value> {
         let url = format!("{}?index={}", self.endpoint, self.system.index());
         let mut attempt = 0u32;
@@ -142,12 +164,6 @@ fn backoff_delay(retry_after: Option<&str>, attempt: u32) -> Duration {
     }
     let ms = 500u64.saturating_mul(1u64 << attempt.min(6));
     Duration::from_millis(ms).min(CAP)
-}
-
-impl SearchClient for AonClient {
-    async fn search(&self, query: &SearchQuery) -> Result<Vec<Document>> {
-        AonClient::search(self, query).await
-    }
 }
 
 /// Parse the `_source` of every hit in a raw AON/Elasticsearch response into

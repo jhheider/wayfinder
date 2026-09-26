@@ -1,6 +1,6 @@
 [package]
 name = "wayfinder-core"
-version = "0.1.1"
+version = "0.2.0"
 edition.workspace = true
 authors.workspace = true
 repository.workspace = true
@@ -21,6 +21,11 @@ html-escape = { workspace = true }
 indexmap = { workspace = true }
 colored = { workspace = true }
 thiserror = "2.0.18"
+dirs.workspace = true
+schemars = { version = "1.2.1", optional = true }
 
 [dev-dependencies]
 tempfile = "3.26.0"
+
+[features]
+schemars = ["dep:schemars"]

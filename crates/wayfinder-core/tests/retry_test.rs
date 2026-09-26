@@ -1,9 +1,10 @@
 //! Exercises `AonClient`'s live request path -- the 429/503 retry loop, backoff,
 //! and status handling -- against a tiny in-process HTTP mock (no extra deps).
 
+use serde_json::json;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
-use wayfinder_core::aon::{AonClient, GameSystem, SearchQuery};
+use wayfinder_core::aon::{AonClient, GameSystem, parse_documents};
 
 const HIT: &str =
     r#"{"hits":{"total":{"value":1},"hits":[{"_source":{"name":"Fireball","category":"spell"}}]}}"#;
@@ -44,10 +45,7 @@ fn client(url: String) -> AonClient {
 #[tokio::test]
 async fn succeeds_on_first_try() {
     let c = client(mock_endpoint(vec![200]).await);
-    let docs = c
-        .search(&SearchQuery::new().name("Fireball"))
-        .await
-        .unwrap();
+    let docs = parse_documents(&c.search_raw(&json!({})).await.unwrap()).unwrap();
     assert_eq!(docs.len(), 1);
     assert_eq!(docs[0].name.as_deref(), Some("Fireball"));
 }
@@ -55,30 +53,27 @@ async fn succeeds_on_first_try() {
 #[tokio::test]
 async fn retries_on_429_then_succeeds() {
     let c = client(mock_endpoint(vec![429, 200]).await);
-    let docs = c
-        .search(&SearchQuery::new().name("Fireball"))
-        .await
-        .unwrap();
+    let docs = parse_documents(&c.search_raw(&json!({})).await.unwrap()).unwrap();
     assert_eq!(docs.len(), 1);
 }
 
 #[tokio::test]
 async fn retries_on_503_then_succeeds() {
     let c = client(mock_endpoint(vec![503, 200]).await);
-    assert!(c.search(&SearchQuery::new().name("x")).await.is_ok());
+    assert!(c.search_raw(&json!({})).await.is_ok());
 }
 
 #[tokio::test]
 async fn gives_up_after_max_attempts() {
     // MAX_ATTEMPTS is 3, so three 429s exhaust the retries and surface an error.
     let c = client(mock_endpoint(vec![429, 429, 429]).await);
-    let err = c.search(&SearchQuery::new().name("x")).await.unwrap_err();
+    let err = c.search_raw(&json!({})).await.unwrap_err();
     assert!(err.to_string().contains("429"), "{err}");
 }
 
 #[tokio::test]
 async fn non_retriable_status_errors_immediately() {
     let c = client(mock_endpoint(vec![500]).await);
-    let err = c.search(&SearchQuery::new().name("x")).await.unwrap_err();
+    let err = c.search_raw(&json!({})).await.unwrap_err();
     assert!(err.to_string().contains("500"), "{err}");
 }

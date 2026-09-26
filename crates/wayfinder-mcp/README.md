@@ -11,12 +11,19 @@ client (rustls + ring TLS, no OpenSSL/aws-lc) with the `wf` CLI.
 It speaks JSON-RPC over stdio and provides three tools:
 
 - **`search`** -- free-text query plus filters (category, traits, level range,
-  source, rarity), with sort and result-limit control.
-- **`get`** -- full rules text for one entry by exact `name` (legacy pre-remaster
-  names resolve too) or by AoN `url`.
+  source, rarity), with sort, `limit` and `offset` paging.
+- **`get`** -- full rules text for one entry, as markdown that keeps AON's
+  structure (stat blocks, action costs, heightening), by exact `name` or by AoN
+  `url`. Legacy pre-remaster names resolve too. When several entries share a
+  name ("Shield" is a spell, an implement and a weapon group), it returns the
+  likeliest and lists the rest.
 - **`list_categories`** -- live category names and entry counts for a game.
 
-Every tool takes an optional `game`: `"pf2e"` (default) or `"sf2e"`.
+Every tool takes an optional `game`: `"pf2e"` (default) or `"sf2e"`. Results
+follow the Remaster: an entry it replaced appears as its remastered version
+unless `legacy: true`. Categories are checked against the game's live list
+(case and plurals are forgiven), and mistakes come back as tool errors with a
+suggestion, so the model can correct itself.
 
 ## Install
 

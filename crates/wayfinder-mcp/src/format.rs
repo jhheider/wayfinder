@@ -1,48 +1,15 @@
-//! Rendering `wayfinder_core::aon::Document`s into the compact plain-text that
-//! the MCP tools return to the model.
+//! Rendering `wayfinder_core::aon::Document`s into the compact plain text the
+//! MCP tools return to the model. The facts (edition, rarity, URLs, rules
+//! content) come from `Document`'s methods, shared with the `wf` CLI; only
+//! the layout lives here.
 
 use wayfinder_core::aon::Document;
-
-/// A document field that only some categories carry, read from the flattened
-/// `extra` map as a string (e.g. `actions`).
-fn extra_str<'a>(doc: &'a Document, key: &str) -> Option<&'a str> {
-    doc.extra
-        .get(key)
-        .and_then(|v| v.as_str())
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-}
-
-/// An `extra` field that is a JSON array of strings (e.g. `legacy_name`,
-/// `source_raw`).
-fn extra_vec(doc: &Document, key: &str) -> Vec<String> {
-    doc.extra
-        .get(key)
-        .and_then(|v| v.as_array())
-        .map(|arr| {
-            arr.iter()
-                .filter_map(|v| v.as_str())
-                .map(str::to_string)
-                .collect()
-        })
-        .unwrap_or_default()
-}
-
-/// Resolve a document's (relative) URL against a site base into an absolute URL.
-fn absolute_url(doc: &Document, base_url: &str) -> String {
-    match doc.url.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
-        None => String::new(),
-        Some(url) if url.starts_with("http://") || url.starts_with("https://") => url.to_string(),
-        Some(url) => format!("{base_url}{url}"),
-    }
-}
+use wayfinder_core::render::render_markdown_unlinked;
 
 fn type_label(doc: &Document) -> &str {
-    let type_ = doc.doc_type.as_deref().unwrap_or("");
-    if type_.is_empty() {
-        doc.category.as_deref().unwrap_or("")
-    } else {
-        type_
+    match doc.doc_type.as_deref().filter(|t| !t.is_empty()) {
+        Some(t) => t,
+        None => doc.category.as_deref().unwrap_or(""),
     }
 }
 
@@ -50,176 +17,114 @@ fn type_label(doc: &Document) -> &str {
 pub fn format_summary(index: usize, doc: &Document, base_url: &str) -> String {
     let name = doc.name.as_deref().unwrap_or("Unknown");
     let label = type_label(doc);
-    let mut header = format!("{index}. {name}");
-    if !label.is_empty() {
-        header.push_str(&format!(" - {label}"));
-        if let Some(level) = doc.level {
-            header.push_str(&format!(" {level}"));
-        }
-    } else if let Some(level) = doc.level {
-        header.push_str(&format!(" (level {level})"));
+    let mut out = format!("{index}. {name}");
+    match (label.is_empty(), doc.level) {
+        (false, Some(level)) => out.push_str(&format!(" - {label} {level}")),
+        (false, None) => out.push_str(&format!(" - {label}")),
+        (true, Some(level)) => out.push_str(&format!(" (level {level})")),
+        (true, None) => {}
     }
     if !doc.traits.is_empty() {
-        header.push_str(&format!(" [{}]", doc.traits.join(", ")));
+        out.push_str(&format!(" [{}]", doc.traits.join(", ")));
     }
-    if let Some(rarity) = doc.rarity.as_deref().filter(|r| *r != "common") {
-        header.push_str(&format!(" ({rarity})"));
+    if let Some(rarity) = doc.notable_rarity() {
+        out.push_str(&format!(" ({rarity})"));
     }
-
-    let mut block = header;
-    if let Some(summary) = doc.summary.as_deref().filter(|s| !s.is_empty()) {
-        block.push_str(&format!("\n   {summary}"));
+    if let Some(note) = doc.edition_note() {
+        out.push_str(&format!(" ({note})"));
     }
-    let url = absolute_url(doc, base_url);
-    if !url.is_empty() {
-        block.push_str(&format!("\n   {url}"));
+    if let Some(summary) = doc
+        .summary
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+    {
+        out.push_str(&format!("\n   {summary}"));
     }
-    block.push('\n');
-    block
-}
-
-/// Render the full detail view for a `get` result.
-pub fn format_detail(doc: &Document, base_url: &str) -> String {
-    let name = doc.name.as_deref().unwrap_or("Unknown");
-    let mut out = format!("# {name}");
-    let label = type_label(doc);
-    if !label.is_empty() {
-        out.push_str(&format!("  ({label}"));
-        if let Some(level) = doc.level {
-            out.push_str(&format!(" {level}"));
-        }
-        out.push(')');
+    if let Some(url) = doc.absolute_url(base_url) {
+        out.push_str(&format!("\n   {url}"));
     }
     out.push('\n');
+    out
+}
 
-    let legacy_name = extra_vec(doc, "legacy_name");
-    if !legacy_name.is_empty() {
-        out.push_str(&format!("Formerly: {}\n", legacy_name.join(", ")));
+/// Render the full detail view for a `get` result: a few lines of metadata
+/// the rules text does not carry, then the entry as markdown (AON's structure
+/// kept: stat block lines, action costs, heightening, tables).
+pub fn format_detail(doc: &Document, base_url: &str) -> String {
+    let mut out = String::new();
+    if let Some(url) = doc.absolute_url(base_url) {
+        out.push_str(&format!("URL: {url}\n"));
     }
-    if let Some(actions) = extra_str(doc, "actions") {
+    if doc.is_legacy() {
+        out.push_str("Edition: legacy (pre-remaster); the Remaster replaced this entry\n");
+    } else if !doc.legacy_name.is_empty() {
+        out.push_str(&format!("Formerly: {}\n", doc.legacy_name.join(", ")));
+    }
+    if let Some(pfs) = &doc.pfs {
+        out.push_str(&format!("PFS: {pfs}\n"));
+    }
+    // AON's markdown opens with its own title, traits and source; the flat
+    // `text` fallback does not, so rebuild those from the fields.
+    if doc.markdown.as_deref().is_none_or(|m| m.trim().is_empty()) {
+        out.push_str(&plain_header(doc));
+    }
+    let mut body = render_markdown_unlinked(&doc.content(base_url));
+    if body.is_empty() {
+        body = doc.summary.as_deref().unwrap_or("").trim().to_string();
+    }
+    if !body.is_empty() {
+        out.push('\n');
+        out.push_str(&body);
+        out.push('\n');
+    }
+    out
+}
+
+/// Title, actions, traits and source lines for entries without markdown.
+fn plain_header(doc: &Document) -> String {
+    let name = doc.name.as_deref().unwrap_or("Unknown");
+    let label = type_label(doc);
+    let mut out = format!("\n# {name}");
+    match (label.is_empty(), doc.level) {
+        (false, Some(level)) => out.push_str(&format!(" ({label} {level})")),
+        (false, None) => out.push_str(&format!(" ({label})")),
+        _ => {}
+    }
+    out.push('\n');
+    if let Some(actions) = doc.extra_str("actions") {
         out.push_str(&format!("Actions: {actions}\n"));
     }
     if !doc.traits.is_empty() {
         out.push_str(&format!("Traits: {}\n", doc.traits.join(", ")));
     }
-    let mut meta = Vec::new();
-    if let Some(rarity) = &doc.rarity {
-        meta.push(format!("Rarity: {rarity}"));
-    }
-    if let Some(pfs) = &doc.pfs {
-        meta.push(format!("PFS: {pfs}"));
-    }
-    if !meta.is_empty() {
-        out.push_str(&format!("{}\n", meta.join(" | ")));
-    }
-    let source_raw = extra_vec(doc, "source_raw");
-    let source = if !source_raw.is_empty() {
-        source_raw.join("; ")
-    } else {
+    let source_raw = doc.extra_strings("source_raw");
+    let source = if source_raw.is_empty() {
         doc.source.join("; ")
+    } else {
+        source_raw.join("; ")
     };
     if !source.is_empty() {
         out.push_str(&format!("Source: {source}\n"));
     }
-    let url = absolute_url(doc, base_url);
-    if !url.is_empty() {
-        out.push_str(&format!("URL: {url}\n"));
-    }
+    out
+}
 
-    let body = doc
-        .text
-        .as_deref()
-        .filter(|s| !s.trim().is_empty())
-        .or(doc.summary.as_deref())
-        .unwrap_or("");
-    if !body.is_empty() {
-        out.push('\n');
-        out.push_str(body.trim());
+/// One line per entry, for listing the other candidates a `get` passed over.
+pub fn format_alternatives(docs: &[Document], base_url: &str) -> String {
+    let mut out = String::new();
+    for doc in docs {
+        let name = doc.name.as_deref().unwrap_or("Unknown");
+        let cat = doc.category.as_deref().unwrap_or("?");
+        out.push_str(&format!("- {name} (category: {cat})"));
+        if let Some(url) = doc.absolute_url(base_url) {
+            out.push_str(&format!(" {url}"));
+        }
         out.push('\n');
     }
     out
 }
 
 #[cfg(test)]
-mod tests {
-    use super::{format_detail, format_summary};
-    use serde_json::json;
-    use wayfinder_core::aon::Document;
-
-    fn doc(v: serde_json::Value) -> Document {
-        serde_json::from_value(v).unwrap()
-    }
-
-    #[test]
-    fn summary_includes_type_level_traits_rarity_summary_url() {
-        let d = doc(json!({
-            "name": "Fireball", "type": "Spell", "category": "spell", "level": 3,
-            "trait": ["Fire", "Evocation"], "rarity": "uncommon",
-            "summary": "Boom.", "url": "/Spells.aspx?ID=1"
-        }));
-        let s = format_summary(1, &d, "https://2e.aonprd.com");
-        assert!(s.contains("1. Fireball - Spell 3"), "{s}");
-        assert!(s.contains("[Fire, Evocation]"));
-        assert!(s.contains("(uncommon)"));
-        assert!(s.contains("Boom."));
-        assert!(s.contains("https://2e.aonprd.com/Spells.aspx?ID=1"));
-    }
-
-    #[test]
-    fn summary_hides_common_rarity_and_keeps_absolute_url() {
-        let d = doc(json!({
-            "name": "X", "category": "feat", "rarity": "common",
-            "url": "https://example.test/y"
-        }));
-        let s = format_summary(2, &d, "https://2e.aonprd.com");
-        assert!(!s.contains("(common)"));
-        assert!(s.contains("https://example.test/y"));
-    }
-
-    #[test]
-    fn summary_uses_category_label_and_level_when_no_type() {
-        let d = doc(json!({"name": "Y", "category": "action", "level": 5}));
-        let s = format_summary(1, &d, "b");
-        assert!(s.contains("1. Y - action 5"), "{s}");
-    }
-
-    #[test]
-    fn summary_unknown_name_and_bare_level() {
-        let d = doc(json!({"category": "", "level": 2}));
-        let s = format_summary(3, &d, "b");
-        assert!(s.contains("3. Unknown (level 2)"), "{s}");
-    }
-
-    #[test]
-    fn detail_renders_all_sections_and_prefers_source_raw() {
-        let d = doc(json!({
-            "name": "Force Barrage", "type": "Spell", "category": "spell", "level": 1,
-            "trait": ["Force"], "rarity": "common", "pfs": "Standard",
-            "source": ["Player Core"], "source_raw": ["Player Core pg. 1"],
-            "legacy_name": ["Magic Missile"], "actions": "Single Action",
-            "text": "Darts of force.", "url": "/Spells.aspx?ID=2"
-        }));
-        let s = format_detail(&d, "https://2e.aonprd.com");
-        assert!(s.contains("# Force Barrage  (Spell 1)"), "{s}");
-        assert!(s.contains("Formerly: Magic Missile"));
-        assert!(s.contains("Actions: Single Action"));
-        assert!(s.contains("Traits: Force"));
-        assert!(s.contains("Rarity: common | PFS: Standard"));
-        assert!(s.contains("Source: Player Core pg. 1"));
-        assert!(s.contains("URL: https://2e.aonprd.com/Spells.aspx?ID=2"));
-        assert!(s.contains("Darts of force."));
-    }
-
-    #[test]
-    fn detail_falls_back_to_summary_and_plain_source_and_omits_missing() {
-        let d = doc(json!({
-            "name": "Z", "category": "feat", "source": ["Core"], "summary": "Short."
-        }));
-        let s = format_detail(&d, "b");
-        assert!(s.starts_with("# Z  (feat)"), "{s}");
-        assert!(s.contains("Source: Core"));
-        assert!(s.contains("Short."));
-        assert!(!s.contains("URL:"));
-        assert!(!s.contains("Traits:"));
-    }
-}
+#[path = "format_tests.rs"]
+mod tests;
