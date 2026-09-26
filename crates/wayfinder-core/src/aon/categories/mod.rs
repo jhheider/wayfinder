@@ -1,5 +1,11 @@
 //! Known AON categories with filterable fields and grouping.
 
+mod fields;
+mod suggest;
+
+pub use fields::filterable_fields;
+pub use suggest::{suggest_category, suggest_from};
+
 /// All known AON category keys.
 pub const ALL_CATEGORIES: &[&str] = &[
     "action",
@@ -113,116 +119,6 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "weapon-group",
     "weather-hazard",
 ];
-
-/// Filterable fields for a category (excludes common metadata).
-/// Returns `None` for unknown categories.
-pub fn filterable_fields(category: &str) -> Option<&'static [&'static str]> {
-    Some(match category {
-        "spell" => &[
-            "actions",
-            "bloodline",
-            "component",
-            "deity",
-            "element",
-            "heighten_group",
-            "level",
-            "patron_theme",
-            "rarity",
-            "saving_throw",
-            "school",
-            "spell_type",
-            "tradition",
-            "trait",
-        ],
-        "feat" => &["feat", "level", "rarity", "trait"],
-        "deity" => &[
-            "alignment",
-            "area_of_concern",
-            "attribute",
-            "cleric_spell",
-            "deity",
-            "divine_font",
-            "domain",
-            "domain_alternate",
-            "domain_primary",
-            "favored_weapon",
-            "follower_alignment",
-            "pantheon",
-            "sanctification",
-            "skill",
-            "spell",
-            "trait",
-        ],
-        "ancestry" => &[
-            "attribute",
-            "attribute_flaw",
-            "hp",
-            "language",
-            "rarity",
-            "size",
-            "trait",
-        ],
-        "class" => &[
-            "attack_proficiency",
-            "attribute",
-            "defense_proficiency",
-            "hp",
-            "rarity",
-            "skill_proficiency",
-        ],
-        "creature" => &[
-            "alignment",
-            "creature_ability",
-            "hp",
-            "immunity",
-            "language",
-            "level",
-            "rarity",
-            "size",
-            "skill",
-            "strongest_save",
-            "trait",
-            "weakest_save",
-        ],
-        "equipment" => &["actions", "level", "rarity", "trait"],
-        "background" => &["attribute", "feat", "rarity", "skill"],
-        "heritage" => &["rarity"],
-        "archetype" => &["archetype", "archetype_category", "level", "rarity"],
-        "action" => &["actions", "rarity"],
-        "hazard" => &["level", "rarity", "trait"],
-        "condition" => &["rarity"],
-        "ritual" => &["level", "rarity", "school", "trait"],
-        "domain" => &["deity", "domain", "spell"],
-        "weapon" => &["damage_type", "deity", "level", "rarity", "trait"],
-        "armor" => &["level", "rarity"],
-        "shield" => &["hp", "level", "rarity"],
-        "vehicle" => &["hp", "level", "rarity", "size", "trait"],
-        "disease" => &["level", "rarity", "saving_throw", "trait"],
-        "curse" => &["level", "rarity", "school", "trait"],
-        "bloodline" => &["bloodline", "rarity", "skill", "spell", "tradition"],
-        "mystery" => &["domain", "rarity", "skill", "spell"],
-        "eidolon" => &[
-            "alignment",
-            "language",
-            "rarity",
-            "size",
-            "skill",
-            "tradition",
-            "trait",
-        ],
-        "patron" => &["rarity", "skill", "spell", "tradition"],
-        "relic" => &["aspect", "element", "rarity", "school", "trait"],
-        "familiar-ability" => &["rarity"],
-        "familiar-specific" => &["familiar_ability", "rarity", "trait"],
-        "animal-companion" => &["hp", "level", "rarity", "size", "skill", "trait"],
-        "plane" => &["alignment", "rarity", "trait"],
-        "language" => &["rarity"],
-        "trait" => &["rarity", "trait", "trait_group"],
-        "class-feature" => &["level", "rarity"],
-        "draconic-exemplar" => &["rarity", "skill", "spell", "tradition"],
-        _ => return None,
-    })
-}
 
 /// Group structure for hierarchical display.
 pub struct CategoryGroup {
@@ -374,58 +270,6 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
     },
 ];
 
-/// Find the closest matching category for a given input.
-/// Returns `None` if no reasonable match exists.
-pub fn suggest_category(input: &str) -> Option<&'static str> {
-    suggest_from(input, ALL_CATEGORIES).copied()
-}
-
-/// Find the closest match for `input` among `candidates` (exact, then a unique
-/// prefix, then a unique substring, then edit distance ≤ 3).
-pub fn suggest_from<'a, S: AsRef<str>>(input: &str, candidates: &'a [S]) -> Option<&'a S> {
-    let input = input.to_lowercase();
-
-    // Exact match
-    if let Some(cat) = candidates.iter().find(|c| c.as_ref() == input) {
-        return Some(cat);
-    }
-
-    // Prefix match
-    let prefix_matches: Vec<&S> = candidates
-        .iter()
-        .filter(|c| c.as_ref().starts_with(&input))
-        .collect();
-    if prefix_matches.len() == 1 {
-        return Some(prefix_matches[0]);
-    }
-
-    // Substring match
-    let substr_matches: Vec<&S> = candidates
-        .iter()
-        .filter(|c| c.as_ref().contains(input.as_str()))
-        .collect();
-    if substr_matches.len() == 1 {
-        return Some(substr_matches[0]);
-    }
-
-    // Edit distance (simple Levenshtein)
-    let mut best = None;
-    let mut best_dist = usize::MAX;
-    for cat in candidates {
-        let d = edit_distance(&input, cat.as_ref());
-        if d < best_dist {
-            best_dist = d;
-            best = Some(cat);
-        }
-    }
-    // Only suggest if distance is reasonable (≤ 3 edits)
-    if best_dist <= 3 {
-        return best;
-    }
-
-    None
-}
-
 /// Emoji icon for a category.
 pub fn category_icon(cat: &str) -> &'static str {
     match cat {
@@ -446,25 +290,4 @@ pub fn category_icon(cat: &str) -> &'static str {
         "domain" => "🌐",
         _ => "📄",
     }
-}
-
-fn edit_distance(a: &str, b: &str) -> usize {
-    let a: Vec<char> = a.chars().collect();
-    let b: Vec<char> = b.chars().collect();
-    let mut dp = vec![vec![0usize; b.len() + 1]; a.len() + 1];
-    for (i, row) in dp.iter_mut().enumerate().take(a.len() + 1) {
-        row[0] = i;
-    }
-    for (j, val) in dp[0].iter_mut().enumerate().take(b.len() + 1) {
-        *val = j;
-    }
-    for i in 1..=a.len() {
-        for j in 1..=b.len() {
-            let cost = if a[i - 1] == b[j - 1] { 0 } else { 1 };
-            dp[i][j] = (dp[i - 1][j] + 1)
-                .min(dp[i][j - 1] + 1)
-                .min(dp[i - 1][j - 1] + cost);
-        }
-    }
-    dp[a.len()][b.len()]
 }
