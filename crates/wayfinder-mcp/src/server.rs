@@ -14,6 +14,7 @@ use rmcp::model::{CallToolResult, ContentBlock, Implementation, ServerCapabiliti
 use rmcp::{ErrorData, ServerHandler, tool, tool_handler, tool_router};
 
 use wayfinder_core::Wayfinder;
+use wayfinder_core::aon::categories::filterable_fields;
 use wayfinder_core::aon::{AonClient, CategoryError, GameSystem};
 use wayfinder_core::cache::ResponseCache;
 
@@ -74,7 +75,7 @@ impl WayfinderServer {
     #[tool(
         description = "Search Pathfinder 2e or Starfinder 2e game data on Archives of Nethys. Set \
         `game` to \"pf2e\" (default) or \"sf2e\". Combine free-text `query` with optional filters \
-        (category, traits, level range, source, rarity). Returns a compact list of matches with \
+        (category, traits, other field values, level range, source, rarity). Returns a compact list of matches with \
         names, levels, traits, summaries, and URLs; page with `offset`. Remastered entries replace \
         their legacy versions unless `legacy` is true. Use `get` to read an entry's full text.",
         annotations(read_only_hint = true, open_world_hint = true)
@@ -89,14 +90,22 @@ impl WayfinderServer {
     async fn run_search(&self, params: SearchParams) -> anyhow::Result<String> {
         let wf = self.game(params.game.as_deref())?;
         let category = resolve_category(wf, params.category.as_deref()).await?;
-        let page = wf.search(&params.to_search(category)).await?;
+        let search = params.to_search(category);
+        let page = wf.search(&search).await?;
         if page.docs.is_empty() {
-            return Ok("No results found. Try a broader query or fewer filters.".to_string());
+            let mut out = "No results found. Try a broader query or fewer filters.".to_string();
+            if !search.fields.is_empty() {
+                out.push_str(&field_hint(search.category.as_deref()));
+            }
+            return Ok(out);
         }
 
         let first = page.offset as usize + 1;
         let last = page.offset as usize + page.docs.len();
-        let mut out = format!("Found {} match(es); showing {first}-{last}", page.total);
+        let mut out = format!(
+            "Found {} match(es); showing {first}-{last}",
+            page.total_label()
+        );
         if let Some(next) = page.next_offset() {
             out.push_str(&format!(" (pass offset={next} for more)"));
         }
@@ -178,6 +187,21 @@ impl WayfinderServer {
     }
 }
 
+/// Why a field filter may have matched nothing, with the known fields for
+/// the category when there are some.
+fn field_hint(category: Option<&str>) -> String {
+    let known = category.and_then(filterable_fields);
+    match (category, known) {
+        (Some(cat), Some(fields)) => format!(
+            " Field filters match exact values; known fields for {cat:?}: {}.",
+            fields.join(", ")
+        ),
+        _ => " Field filters match exact values, and which fields exist depends on the \
+              category; set `category` to scope them."
+            .to_string(),
+    }
+}
+
 /// Resolve an optional `category` argument. A near miss is an error naming
 /// the suggestion rather than a silent substitution: the model should know
 /// what it actually searched.
@@ -213,5 +237,18 @@ impl ServerHandler for WayfinderServer {
              categories: {}.",
             common_categories_hint()
         ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::field_hint;
+
+    #[test]
+    fn field_hint_lists_known_fields_for_the_category() {
+        let hint = field_hint(Some("spell"));
+        assert!(hint.contains("tradition"), "{hint}");
+        assert!(field_hint(None).contains("set `category`"));
+        assert!(field_hint(Some("no-such-category")).contains("set `category`"));
     }
 }

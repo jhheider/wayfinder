@@ -1,6 +1,6 @@
 [package]
 name = "wayfinder-core"
-version = "0.2.0"
+version = "0.2.1"
 edition.workspace = true
 authors.workspace = true
 repository.workspace = true
@@ -9,6 +9,7 @@ description = "Client, cache, search, and rendering for Archives of Nethys Pathf
 readme = "README.md"
 keywords = ["pathfinder", "starfinder", "ttrpg", "nethys", "elasticsearch"]
 categories = ["api-bindings", "caching", "game-development"]
+rust-version.workspace = true
 
 [dependencies]
 reqwest = { workspace = true }

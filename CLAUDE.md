@@ -63,10 +63,17 @@ cargo run -p wayfinder-mcp
 ## CI / Release
 Four thin caller workflows use the reusable `jhheider/rust-ci@v1` workflows:
 `ci.yml`, `style.yml`, `audit.yml`, `release.yml`. Release publishes all three
-crates to crates.io (dependency order: core → cli → mcp), ships prebuilt `wf`
-binaries + a Homebrew formula; `wayfinder-mcp` is distributed via
-`cargo install wayfinder-mcp`. `wf` implements `--manpage`/`--completions` for
-packager doc generation (`gen-docs: true`).
+crates to crates.io (dependency order: core → cli → mcp) and ships prebuilt
+binaries plus a Homebrew formula for both `wf` and `wayfinder-mcp`. `wf`
+implements `--manpage`/`--completions` for packager doc generation
+(`gen-docs: true`). Cut a release with `gh release create vX.Y.Z`.
+
+`aon-canary.yml` runs `crates/wayfinder-core/tests/live_test.rs` (ignored in
+normal CI) against live AON every Monday and opens an `aon-canary` issue when
+it fails. When AON changes something wayfinder assumes (index names, remaster
+fields, category keys), add a check there. MSRV (`rust-version` in the
+workspace) comes from `cargo msrv find --min 1.85`: cargo-msrv 0.19 cannot
+read an inherited `edition` and otherwise bisects from 1.48.
 
 ## Data Sources
 - **PF2e**: `POST https://elasticsearch.aonprd.com/aon/_search` → index `aon70`

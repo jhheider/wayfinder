@@ -8,6 +8,7 @@
 use rusqlite::{Connection, OptionalExtension, params};
 use serde_json::Value;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicI64, Ordering};
 use std::sync::{Mutex, MutexGuard};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -20,11 +21,17 @@ pub const CACHE_ENV: &str = "WAYFINDER_CACHE";
 /// the hour; a day keeps errata reasonably current.
 pub const DEFAULT_TTL: Duration = Duration::from_secs(24 * 60 * 60);
 
+/// Writes delete expired rows at most this often (per handle), so a
+/// long-running server's cache stays bounded without `wf cache purge`.
+const PURGE_EVERY_SECS: i64 = 60 * 60;
+
 /// Cached AON responses in SQLite.
 pub struct ResponseCache {
     conn: Mutex<Connection>,
     path: PathBuf,
     ttl_secs: i64,
+    /// When this handle last deleted expired rows (0: never).
+    last_purge: AtomicI64,
 }
 
 impl ResponseCache {
@@ -52,6 +59,7 @@ impl ResponseCache {
             conn: Mutex::new(conn),
             path: path.to_path_buf(),
             ttl_secs: DEFAULT_TTL.as_secs() as i64,
+            last_purge: AtomicI64::new(0),
         })
     }
 
@@ -115,11 +123,23 @@ impl ResponseCache {
     }
 
     /// Store `response` under `key` for `game` (a label for [`Self::status`]).
+    /// The first write, and then one an hour, also deletes expired rows.
     pub fn put(&self, key: &str, game: &str, response: &Value) -> Result<()> {
+        let now = now();
+        let last = self.last_purge.load(Ordering::Relaxed);
+        if now - last >= PURGE_EVERY_SECS
+            && self
+                .last_purge
+                .compare_exchange(last, now, Ordering::Relaxed, Ordering::Relaxed)
+                .is_ok()
+        {
+            // Best effort, like every cache write.
+            let _ = self.purge_expired();
+        }
         self.conn().execute(
             "INSERT OR REPLACE INTO responses (key, game, body, fetched_at)
              VALUES (?1, ?2, ?3, ?4)",
-            params![key, game, response.to_string(), now()],
+            params![key, game, response.to_string(), now],
         )?;
         Ok(())
     }

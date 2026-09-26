@@ -80,3 +80,25 @@ fn two_handles_share_one_file() {
     a.put("k", "PF2e", &json!("from a")).unwrap();
     assert_eq!(b.get("k"), Some(json!("from a")));
 }
+
+#[test]
+fn writes_purge_expired_rows_without_an_explicit_purge() {
+    // Regression: expired rows were only deleted by `wf cache purge`, so a
+    // long-running MCP server's cache file grew forever.
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("c.db");
+    let old = ResponseCache::open(&path).unwrap();
+    old.put("stale", "PF2e", &json!(1)).unwrap();
+    // A later handle (a later process) with every row already expired.
+    let later = ResponseCache::open(&path).unwrap().with_ttl(Duration::ZERO);
+    later.put("fresh", "PF2e", &json!(2)).unwrap();
+    let conn = rusqlite::Connection::open(&path).unwrap();
+    let keys: Vec<String> = conn
+        .prepare("SELECT key FROM responses")
+        .unwrap()
+        .query_map([], |r| r.get(0))
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    assert_eq!(keys, ["fresh"]);
+}

@@ -11,7 +11,8 @@ client (rustls + ring TLS, no OpenSSL/aws-lc) with the `wf` CLI.
 It speaks JSON-RPC over stdio and provides three tools:
 
 - **`search`** -- free-text query plus filters (category, traits, level range,
-  source, rarity), with sort, `limit` and `offset` paging.
+  source, rarity, and exact field values such as `{"tradition": "arcane"}`),
+  with sort, `limit` and `offset` paging.
 - **`get`** -- full rules text for one entry, as markdown that keeps AON's
   structure (stat blocks, action costs, heightening), by exact `name` or by AoN
   `url`. Legacy pre-remaster names resolve too. When several entries share a

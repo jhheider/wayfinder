@@ -1946,7 +1946,7 @@ dependencies = [
 
 [[package]]
 name = "wayfinder-cli"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -1962,7 +1962,7 @@ dependencies = [
 
 [[package]]
 name = "wayfinder-core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "colored",
  "dirs",
@@ -1981,7 +1981,7 @@ dependencies = [
 
 [[package]]
 name = "wayfinder-mcp"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "clap",
