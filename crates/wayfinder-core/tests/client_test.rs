@@ -51,3 +51,14 @@ fn game_system_endpoints_and_labels() {
     assert_eq!(sf.label(), "SF2e");
     assert_eq!(sf.base_url(), "https://2e.aonsrd.com");
 }
+
+#[test]
+fn game_system_parses_aliases_case_insensitively() {
+    for v in ["pf2e", "PF2E", " Pathfinder ", "pathfinder2e", "aonprd"] {
+        assert_eq!(v.parse::<GameSystem>(), Ok(GameSystem::Pathfinder), "{v}");
+    }
+    for v in ["sf2e", "SF2E", "Starfinder", "aonsf", "aonsrd"] {
+        assert_eq!(v.parse::<GameSystem>(), Ok(GameSystem::Starfinder), "{v}");
+    }
+    assert!("dnd".parse::<GameSystem>().is_err());
+}

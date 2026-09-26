@@ -42,15 +42,7 @@ pub fn common_categories_hint() -> String {
 pub fn game_system(value: Option<&str>) -> Result<GameSystem, String> {
     match value.map(str::trim).filter(|s| !s.is_empty()) {
         None => Ok(GameSystem::Pathfinder),
-        Some(v) => match v.to_lowercase().as_str() {
-            "pf2e" | "pf" | "pathfinder" | "pathfinder2e" | "aonprd" => Ok(GameSystem::Pathfinder),
-            "sf2e" | "sf" | "starfinder" | "starfinder2e" | "aonsf" | "aonsrd" => {
-                Ok(GameSystem::Starfinder)
-            }
-            other => Err(format!(
-                "unknown game {other:?}; expected \"pf2e\" (Pathfinder 2e) or \"sf2e\" (Starfinder 2e)"
-            )),
-        },
+        Some(v) => v.parse(),
     }
 }
 
@@ -151,16 +143,6 @@ mod tests {
     fn game_defaults_to_pathfinder() {
         assert_eq!(game_system(None).unwrap(), GameSystem::Pathfinder);
         assert_eq!(game_system(Some("  ")).unwrap(), GameSystem::Pathfinder);
-    }
-
-    #[test]
-    fn game_parses_aliases_case_insensitively() {
-        for v in ["pf2e", "PF2E", "Pathfinder", "pathfinder2e", "aonprd"] {
-            assert_eq!(game_system(Some(v)).unwrap(), GameSystem::Pathfinder, "{v}");
-        }
-        for v in ["sf2e", "SF2E", "Starfinder", "aonsf", "aonsrd"] {
-            assert_eq!(game_system(Some(v)).unwrap(), GameSystem::Starfinder, "{v}");
-        }
     }
 
     #[test]

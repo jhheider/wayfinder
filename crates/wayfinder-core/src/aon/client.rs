@@ -49,6 +49,28 @@ impl GameSystem {
     }
 }
 
+/// Parses a game name case-insensitively: `pf2e`/`pathfinder`/`aonprd` or
+/// `sf2e`/`starfinder`/`aonsrd` (and a few other common spellings).
+impl std::str::FromStr for GameSystem {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "pf2e" | "pf" | "pathfinder" | "pathfinder2e" | "aonprd" => Ok(Self::Pathfinder),
+            "sf2e" | "sf" | "starfinder" | "starfinder2e" | "aonsf" | "aonsrd" => {
+                Ok(Self::Starfinder)
+            }
+            other => Err(format!(
+                "unknown game {other:?}; expected \"pf2e\" (Pathfinder 2e) or \"sf2e\" (Starfinder 2e)"
+            )),
+        }
+    }
+}
+
+/// Environment variable that points clients built by [`AonClient::from_env`]
+/// at a different `_search` endpoint (a mirror, proxy, or test server).
+pub const ENDPOINT_ENV: &str = "WAYFINDER_AON_ENDPOINT";
+
 /// HTTP client for AON's Elasticsearch backend.
 #[derive(Clone)]
 pub struct AonClient {
@@ -60,6 +82,15 @@ pub struct AonClient {
 impl AonClient {
     pub fn new(system: GameSystem) -> Result<Self> {
         Self::with_endpoint(system, system.endpoint())
+    }
+
+    /// Like [`AonClient::new`], but honors [`ENDPOINT_ENV`] when it is set and
+    /// non-empty.
+    pub fn from_env(system: GameSystem) -> Result<Self> {
+        match std::env::var(ENDPOINT_ENV) {
+            Ok(ep) if !ep.trim().is_empty() => Self::with_endpoint(system, ep),
+            _ => Self::new(system),
+        }
     }
 
     /// Construct a client pointed at a specific `_search` endpoint instead of

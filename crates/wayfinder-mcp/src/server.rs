@@ -15,15 +15,6 @@ use crate::format::{format_detail, format_summary};
 use crate::params::{GameParams, GetParams, SearchParams, common_categories_hint, game_system};
 use crate::query::{build_categories_query, build_get_query, build_search_query};
 
-/// Build an AON client, honoring `WAYFINDER_AON_ENDPOINT` if set (points the
-/// client at a mirror/proxy or a test server instead of live Nethys).
-fn build_client(system: GameSystem) -> anyhow::Result<AonClient> {
-    Ok(match std::env::var("WAYFINDER_AON_ENDPOINT") {
-        Ok(ep) if !ep.trim().is_empty() => AonClient::with_endpoint(system, ep)?,
-        _ => AonClient::new(system)?,
-    })
-}
-
 /// Pathfinder 2e / Starfinder 2e MCP server backed by Archives of Nethys.
 #[derive(Clone)]
 pub struct WayfinderServer {
@@ -37,8 +28,8 @@ impl WayfinderServer {
     /// Construct the server with AoN clients for both games.
     pub fn new() -> anyhow::Result<Self> {
         Ok(Self {
-            pf2e: build_client(GameSystem::Pathfinder)?,
-            sf2e: build_client(GameSystem::Starfinder)?,
+            pf2e: AonClient::from_env(GameSystem::Pathfinder)?,
+            sf2e: AonClient::from_env(GameSystem::Starfinder)?,
             tool_router: Self::tool_router(),
         })
     }

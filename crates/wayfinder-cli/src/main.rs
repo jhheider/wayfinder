@@ -166,15 +166,6 @@ fn game_system(cli: &Cli) -> GameSystem {
     }
 }
 
-/// Build the AON client, honoring `WAYFINDER_AON_ENDPOINT` if set (points the
-/// client at a mirror/proxy or a test server instead of live Nethys).
-fn build_client(system: GameSystem) -> Result<AonClient> {
-    Ok(match std::env::var("WAYFINDER_AON_ENDPOINT") {
-        Ok(ep) if !ep.trim().is_empty() => AonClient::with_endpoint(system, ep)?,
-        _ => AonClient::new(system)?,
-    })
-}
-
 /// Whether `s` names a known AON category (normalizing plural/case).
 fn is_known_category(s: &str) -> bool {
     ALL_CATEGORIES.contains(&normalize_category(s).as_str())
@@ -226,7 +217,7 @@ async fn main() -> Result<()> {
         std::fs::create_dir_all(parent)?;
     }
 
-    let client = build_client(system)?;
+    let client = AonClient::from_env(system)?;
     let svc = SearchService::new(client, &cache);
 
     let sys_label = if cli.sf2e {
