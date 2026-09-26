@@ -1,0 +1,62 @@
+name: AON canary
+
+# wayfinder hard-codes facts about Archives of Nethys's Elasticsearch indexes
+# (index names, fields, category keys) that mocks cannot catch going stale.
+# Weekly, run the live checks in crates/wayfinder-core/tests/live_test.rs and
+# open an issue when they fail, unless one is already open.
+
+on:
+  schedule:
+    - cron: "17 9 * * 1"
+  workflow_dispatch:
+    inputs:
+      endpoint:
+        description: "_search endpoint to check instead of live AON (a mirror, or a dead URL to test the failure path)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Explicit: only an explicit bash gets -o pipefail, so `cargo test | tee`
+        # fails when the tests do.
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Run live checks
+        id: live
+        env:
+          WAYFINDER_AON_ENDPOINT: ${{ inputs.endpoint }}
+        run: cargo test -p wayfinder-core --test live_test -- --ignored 2>&1 | tee live.log
+      - name: Open an issue unless one is open
+        if: failure() && steps.live.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -n "$(gh issue list --label aon-canary --state open --json number --jq '.[].number')" ]; then
+            echo "An aon-canary issue is already open; not opening another."
+            exit 0
+          fi
+          gh label create aon-canary --color B60205 \
+            --description "Live Archives of Nethys checks failing" 2>/dev/null || true
+          {
+            echo "The weekly live checks against Archives of Nethys failed: $RUN_URL"
+            echo
+            echo "AON may have renamed an index or field, or added categories."
+            echo "Run \`cargo test -p wayfinder-core --test live_test -- --ignored\` locally to dig in."
+            echo
+            echo '```'
+            grep -E "panicked|FAILED|test result|error" live.log | tail -40
+            echo '```'
+          } > body.md
+          gh issue create --title "AON canary: live checks failing" \
+            --label aon-canary --body-file body.md
