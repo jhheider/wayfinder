@@ -46,6 +46,10 @@ pub fn game_system(value: Option<&str>) -> Result<GameSystem, String> {
     }
 }
 
+/// Elasticsearch's default `index.max_result_window`: `from + size` may not
+/// exceed it.
+const MAX_WINDOW: u32 = 10_000;
+
 /// Parameters for the `search` tool. Every field is optional; an empty set
 /// returns the first page of all entries.
 #[derive(Debug, Default, Deserialize, schemars::JsonSchema)]
@@ -67,7 +71,7 @@ pub struct SearchParams {
     pub category: Option<String>,
 
     /// Restrict to entries that have ALL of these traits (case-insensitive),
-    /// e.g. ["Fire", "Evocation"] or ["uncommon"].
+    /// e.g. ["fire", "healing"] or ["uncommon"].
     #[serde(default)]
     pub traits: Vec<String>,
 
@@ -79,7 +83,8 @@ pub struct SearchParams {
     #[serde(default)]
     pub max_level: Option<i64>,
 
-    /// Restrict to a source book by name, e.g. "Player Core".
+    /// Restrict to a source book by name, matched as a phrase, e.g. "Player
+    /// Core" (which also matches "Player Core 2").
     #[serde(default)]
     pub source: Option<String>,
 
@@ -91,15 +96,46 @@ pub struct SearchParams {
     #[serde(default)]
     pub limit: Option<u32>,
 
-    /// Result ordering: "relevance" (default), "level" (ascending), or "name".
+    /// Number of results to skip, for paging past the first `limit` matches.
     #[serde(default)]
-    pub sort: Option<String>,
+    pub offset: Option<u32>,
+
+    /// Result ordering (default "relevance").
+    #[serde(default)]
+    pub sort: Sort,
+
+    /// Prefer legacy (pre-remaster) versions. By default an entry that the
+    /// Remaster replaced is hidden in favor of its remastered version (e.g.
+    /// the Player Core "Heal", not the Core Rulebook one); set true to see the
+    /// legacy version instead. Entries the Remaster never touched always appear.
+    #[serde(default)]
+    pub legacy: bool,
+}
+
+/// Result ordering for `search`.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Deserialize, schemars::JsonSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum Sort {
+    /// Best match first.
+    #[default]
+    Relevance,
+    /// Lowest level/rank first, then relevance.
+    Level,
+    /// Alphabetical by name.
+    Name,
 }
 
 impl SearchParams {
     /// Effective result limit, clamped to a sane range.
     pub fn effective_limit(&self) -> u32 {
         self.limit.unwrap_or(10).clamp(1, 50)
+    }
+
+    /// Effective offset. Elasticsearch refuses to page past 10,000 hits.
+    pub fn effective_offset(&self) -> u32 {
+        self.offset
+            .unwrap_or(0)
+            .min(MAX_WINDOW - self.effective_limit())
     }
 }
 
@@ -133,6 +169,13 @@ pub struct GetParams {
     /// Takes precedence over `name`.
     #[serde(default)]
     pub url: Option<String>,
+
+    /// Prefer legacy (pre-remaster) versions. By default an entry that the
+    /// Remaster replaced is hidden in favor of its remastered version (e.g.
+    /// the Player Core "Heal", not the Core Rulebook one); set true to see the
+    /// legacy version instead. Entries the Remaster never touched always appear.
+    #[serde(default)]
+    pub legacy: bool,
 }
 
 #[cfg(test)]
@@ -158,5 +201,23 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(p.effective_limit(), 50);
+    }
+
+    #[test]
+    fn offset_stays_inside_the_result_window() {
+        let p = SearchParams {
+            offset: Some(20_000),
+            limit: Some(10),
+            ..Default::default()
+        };
+        assert_eq!(p.effective_offset(), 9_990);
+        assert_eq!(SearchParams::default().effective_offset(), 0);
+    }
+
+    #[test]
+    fn sort_rejects_unknown_values() {
+        let ok: SearchParams = serde_json::from_str(r#"{"sort":"level"}"#).unwrap();
+        assert_eq!(ok.sort, Sort::Level);
+        assert!(serde_json::from_str::<SearchParams>(r#"{"sort":"random"}"#).is_err());
     }
 }

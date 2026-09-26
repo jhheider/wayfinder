@@ -81,7 +81,8 @@ packager doc generation (`gen-docs: true`).
 
 ## Key Modules (wayfinder-core)
 - `aon::client` -- `AonClient` (+ `search_raw` for custom ES bodies, and the
-  public `parse_documents` / `parse_total` helpers), `GameSystem` (PF2e/SF2e)
+  public `parse_documents` / `parse_total` helpers; `from_env` honors
+  `WAYFINDER_AON_ENDPOINT`), `GameSystem` (PF2e/SF2e, `FromStr` for game names)
 - `aon::query` -- `SearchQuery` builder (CLI-oriented)
 - `aon::models` -- `Document` serde struct with `#[serde(flatten)]` extra fields
 - `aon::categories` -- known categories, grouped hierarchy, filterable fields
@@ -92,10 +93,15 @@ packager doc generation (`gen-docs: true`).
   opportunistically as you query (no bulk category mirroring)
 
 ## wayfinder-mcp notes
-- Keeps its own MCP-tuned ES query builders (`query.rs`: sort, level range,
-  `_source` projection, category aggregation) and param structs (`params.rs`,
-  schemars-described), but routes ALL network I/O and the document model through
+- Keeps its own MCP-tuned ES query builders (`query.rs`: sort, paging, level
+  range, legacy/remaster `must_not`, `_source` projection, category
+  aggregation) and param structs (`params.rs`, schemars-described), but routes
+  ALL network I/O, the document model and markdown rendering through
   `wayfinder-core` -- no duplicated AON client.
+- `game.rs` caches each game's live category list (validates `category`);
+  `pick.rs` chooses among `get` candidates that share a name.
+- Tool bodies return `anyhow::Result<String>`; `respond` turns failures into
+  `isError` tool results (which the model sees), not JSON-RPC errors.
 - `rmcp` 2.x: tool results use `ContentBlock` (not `Content`).
 - Verify tool changes against LIVE AON by driving stdio JSON-RPC, not just a
   compile -- the tool surface must keep matching real Nethys results.

@@ -97,3 +97,37 @@ fn list_categories_returns_counts() {
     ]);
     assert!(out.contains("spell") && out.contains("405"), "{out}");
 }
+
+#[test]
+fn unknown_category_is_a_tool_error_with_a_suggestion() {
+    // Regression: an unknown category (e.g. a typo) filtered to zero hits and
+    // looked like "no results"; it must say so and suggest the real one.
+    let out = drive(&[
+        INIT,
+        INITED,
+        r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search","arguments":{"category":"spel"}}}"#,
+    ]);
+    assert!(out.contains(r#""isError":true"#), "{out}");
+    assert!(out.contains(r#"did you mean \"spell\"?"#), "{out}");
+}
+
+#[test]
+fn plural_category_resolves_and_search_reports_paging() {
+    let out = drive(&[
+        INIT,
+        INITED,
+        r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search","arguments":{"category":"Spells","offset":0}}}"#,
+    ]);
+    assert!(!out.contains(r#""isError":true"#), "{out}");
+    assert!(out.contains("showing 1-1"), "{out}");
+}
+
+#[test]
+fn tools_advertise_read_only() {
+    let out = drive(&[
+        INIT,
+        INITED,
+        r#"{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}"#,
+    ]);
+    assert!(out.contains(r#""readOnlyHint":true"#), "{out}");
+}

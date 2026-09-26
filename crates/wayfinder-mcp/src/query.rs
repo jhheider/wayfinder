@@ -5,7 +5,11 @@
 
 use serde_json::{Value, json};
 
-use crate::params::{GetParams, SearchParams};
+use crate::params::{GetParams, SearchParams, Sort};
+
+/// How many candidates a `get` by name fetches, so the server can prefer an
+/// exact name match and list the other entries that share it.
+pub const GET_CANDIDATES: u32 = 10;
 
 /// Fields returned for list-style `search` results (kept small for compact output).
 const SEARCH_SOURCE_FIELDS: &[&str] = &[
@@ -21,6 +25,7 @@ const SEARCH_SOURCE_FIELDS: &[&str] = &[
     "summary",
     "actions",
     "legacy_name",
+    "remaster_id",
 ];
 
 /// Fields returned for a full `get` (adds the body text/markdown).
@@ -38,6 +43,7 @@ const DETAIL_SOURCE_FIELDS: &[&str] = &[
     "summary",
     "actions",
     "legacy_name",
+    "remaster_id",
     "text",
     "markdown",
 ];
@@ -68,8 +74,9 @@ pub fn build_search_query(params: &SearchParams) -> Value {
         filters.push(json!({ "range": { "level": range } }));
     }
 
+    // A phrase, not `match`: "Player Core" must not match "Core Rulebook".
     if let Some(source) = non_empty(&params.source) {
-        filters.push(json!({ "match": { "source": source } }));
+        filters.push(json!({ "match_phrase": { "source": source } }));
     }
 
     if let Some(rarity) = non_empty(&params.rarity) {
@@ -87,16 +94,21 @@ pub fn build_search_query(params: &SearchParams) -> Value {
         None => json!([{ "match_all": {} }]),
     };
 
-    let sort = match params.sort.as_deref() {
-        Some("level") => json!([{ "level": "asc" }, "_score"]),
-        Some("name") => json!([{ "name.keyword": "asc" }]),
-        _ => json!(["_score"]),
+    let sort = match params.sort {
+        Sort::Relevance => json!(["_score"]),
+        Sort::Level => json!([{ "level": "asc" }, "_score"]),
+        Sort::Name => json!([{ "name.keyword": "asc" }]),
     };
 
     json!({
         "size": params.effective_limit(),
+        "from": params.effective_offset(),
         "_source": SEARCH_SOURCE_FIELDS,
-        "query": { "bool": { "must": must, "filter": filters } },
+        "query": { "bool": {
+            "must": must,
+            "filter": filters,
+            "must_not": [edition_filter(params.legacy)]
+        } },
         "sort": sort
     })
 }
@@ -133,10 +145,22 @@ pub fn build_get_query(params: &GetParams, base_url: &str) -> Result<Value, Stri
     }]);
 
     Ok(json!({
-        "size": 1,
+        "size": GET_CANDIDATES,
         "_source": DETAIL_SOURCE_FIELDS,
-        "query": { "bool": { "must": must, "filter": filters } }
+        "query": { "bool": {
+            "must": must,
+            "filter": filters,
+            "must_not": [edition_filter(params.legacy)]
+        } }
     }))
+}
+
+/// The `must_not` clause that hides one side of each legacy/remaster pair:
+/// legacy entries carry `remaster_id`, remastered ones `legacy_id`. Entries
+/// the Remaster never touched carry neither and always match.
+fn edition_filter(legacy: bool) -> Value {
+    let field = if legacy { "legacy_id" } else { "remaster_id" };
+    json!({ "exists": { "field": field } })
 }
 
 /// Build the aggregation body for `list_categories`: the set of categories and
@@ -169,13 +193,18 @@ fn non_empty(opt: &Option<String>) -> Option<&str> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::params::{GetParams, SearchParams};
+    use crate::params::{GetParams, SearchParams, Sort};
 
     #[test]
     fn empty_search_is_match_all_with_default_limit() {
         let q = build_search_query(&SearchParams::default());
         assert_eq!(q["size"], json!(10));
+        assert_eq!(q["from"], json!(0));
         assert_eq!(q["query"]["bool"]["must"][0], json!({ "match_all": {} }));
+        assert_eq!(
+            q["query"]["bool"]["must_not"],
+            json!([{ "exists": { "field": "remaster_id" } }])
+        );
         assert_eq!(q["query"]["bool"]["filter"], json!([]));
         assert_eq!(q["sort"], json!(["_score"]));
     }
@@ -189,13 +218,16 @@ mod tests {
             min_level: Some(1),
             max_level: Some(5),
             rarity: Some("Common".to_string()),
+            source: Some("Player Core".to_string()),
             limit: Some(3),
-            sort: Some("level".to_string()),
+            offset: Some(6),
+            sort: Sort::Level,
             ..Default::default()
         };
         let q = build_search_query(&params);
 
         assert_eq!(q["size"], json!(3));
+        assert_eq!(q["from"], json!(6));
         assert_eq!(
             q["query"]["bool"]["must"][0]["multi_match"]["query"],
             json!("fireball")
@@ -206,13 +238,15 @@ mod tests {
         assert!(filters.contains(&json!({ "term": { "trait": "evocation" } })));
         assert!(filters.contains(&json!({ "range": { "level": { "gte": 1, "lte": 5 } } })));
         assert!(filters.contains(&json!({ "term": { "rarity": "common" } })));
+        // Regression: a plain `match` let "Player Core" match "Core Rulebook".
+        assert!(filters.contains(&json!({ "match_phrase": { "source": "Player Core" } })));
         assert_eq!(q["sort"], json!([{ "level": "asc" }, "_score"]));
     }
 
     #[test]
     fn name_sort_uses_keyword_field() {
         let params = SearchParams {
-            sort: Some("name".to_string()),
+            sort: Sort::Name,
             ..Default::default()
         };
         assert_eq!(
@@ -229,7 +263,11 @@ mod tests {
             ..Default::default()
         };
         let q = build_get_query(&params, "https://2e.aonprd.com").unwrap();
-        assert_eq!(q["size"], json!(1));
+        assert_eq!(q["size"], json!(GET_CANDIDATES));
+        assert_eq!(
+            q["query"]["bool"]["must_not"],
+            json!([{ "exists": { "field": "remaster_id" } }])
+        );
         assert_eq!(
             q["query"]["bool"]["must"][0]["multi_match"]["type"],
             json!("phrase")
@@ -250,6 +288,20 @@ mod tests {
         assert_eq!(
             q["query"],
             json!({ "term": { "url": "/Spells.aspx?ID=119" } })
+        );
+    }
+
+    #[test]
+    fn legacy_hides_remastered_entries_instead() {
+        let params = GetParams {
+            name: Some("Heal".to_string()),
+            legacy: true,
+            ..Default::default()
+        };
+        let q = build_get_query(&params, "https://2e.aonprd.com").unwrap();
+        assert_eq!(
+            q["query"]["bool"]["must_not"],
+            json!([{ "exists": { "field": "legacy_id" } }])
         );
     }
 
