@@ -537,6 +537,8 @@ fn consume_link(chars: &mut std::iter::Peekable<std::str::Chars<'_>>) -> (String
     (text, url)
 }
 
+/// Consume `**bold**`, returning its text with any inline link markup reduced
+/// to the link text (AON bolds whole links, e.g. `**[Recall Knowledge](/Rules...)**`).
 fn consume_bold(chars: &mut std::iter::Peekable<std::str::Chars<'_>>) -> String {
     chars.next();
     chars.next();
@@ -554,7 +556,7 @@ fn consume_bold(chars: &mut std::iter::Peekable<std::str::Chars<'_>>) -> String 
             chars.next();
         }
     }
-    text
+    strip_inner_tags(&text)
 }
 
 fn resolve_url(url: &str, base_url: &str) -> String {

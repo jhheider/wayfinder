@@ -343,3 +343,17 @@ fn table_cells_strip_tags() {
     assert!(dbg.contains("Cell"), "{dbg}");
     assert!(dbg.contains("Two"), "{dbg}");
 }
+
+#[test]
+fn bold_link_keeps_only_the_link_text() {
+    // Regression: AON bolds whole links in creature Recall Knowledge lines;
+    // the raw `[text](/url)` leaked into the key, unresolved.
+    let blocks = parse_content(
+        "**[Recall Knowledge - Humanoid](/Rules.aspx?ID=563)**: DC 13",
+        BASE,
+    );
+    let ContentBlock::KeyValue { key, .. } = &blocks[0] else {
+        panic!("expected KeyValue, got {blocks:?}");
+    };
+    assert_eq!(key, "Recall Knowledge - Humanoid");
+}
