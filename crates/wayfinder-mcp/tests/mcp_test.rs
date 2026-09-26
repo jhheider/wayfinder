@@ -5,6 +5,8 @@
 use std::io::{Read, Write};
 use std::net::TcpListener;
 use std::process::{Command, Stdio};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 const HIT: &str = r#"{"hits":{"total":{"value":1},"hits":[{"_source":{
     "id":"spell-119","name":"Fireball","category":"spell","type":"Spell","level":3,
@@ -12,11 +14,15 @@ const HIT: &str = r#"{"hits":{"total":{"value":1},"hits":[{"_source":{
 
 const CATS: &str = r#"{"aggregations":{"cats":{"buckets":[{"key":"spell","doc_count":405}]}}}"#;
 
-fn spawn_mock() -> String {
+/// A mock `_search` endpoint and a count of the requests it has answered.
+fn spawn_mock() -> (String, Arc<AtomicUsize>) {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let addr = listener.local_addr().unwrap();
+    let count = Arc::new(AtomicUsize::new(0));
+    let seen = count.clone();
     std::thread::spawn(move || {
         while let Ok((mut sock, _)) = listener.accept() {
+            seen.fetch_add(1, Ordering::SeqCst);
             let mut buf = [0u8; 8192];
             let n = sock.read(&mut buf).unwrap_or(0);
             // list_categories posts an aggregation body; everything else is a hit list.
@@ -30,14 +36,20 @@ fn spawn_mock() -> String {
             let _ = sock.write_all(resp.as_bytes());
         }
     });
-    format!("http://{addr}/_search")
+    (format!("http://{addr}/_search"), count)
 }
 
-/// Run the server with the given JSON-RPC request lines on stdin; return stdout.
+/// Run the server with the given JSON-RPC request lines on stdin, caching
+/// off; return stdout.
 fn drive(requests: &[&str]) -> String {
-    let ep = spawn_mock();
+    drive_with(&spawn_mock().0, "off", requests)
+}
+
+/// Run the server against `endpoint` with `WAYFINDER_CACHE=cache`.
+fn drive_with(endpoint: &str, cache: &str, requests: &[&str]) -> String {
     let mut child = Command::new(env!("CARGO_BIN_EXE_wayfinder-mcp"))
-        .env("WAYFINDER_AON_ENDPOINT", ep)
+        .env("WAYFINDER_AON_ENDPOINT", endpoint)
+        .env("WAYFINDER_CACHE", cache)
         .env("RUST_LOG", "error")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -130,4 +142,24 @@ fn tools_advertise_read_only() {
         r#"{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}"#,
     ]);
     assert!(out.contains(r#""readOnlyHint":true"#), "{out}");
+}
+
+#[test]
+fn a_second_server_is_served_from_the_shared_cache() {
+    let (ep, requests) = spawn_mock();
+    let dir = std::env::temp_dir().join(format!("wayfinder-mcp-it-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    let cache = dir.join("cache.db");
+    let call = r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search","arguments":{"query":"fireball"}}}"#;
+    let first = drive_with(&ep, cache.to_str().unwrap(), &[INIT, INITED, call]);
+    assert!(first.contains("Fireball"), "{first}");
+    assert_eq!(requests.load(Ordering::SeqCst), 1);
+    let second = drive_with(&ep, cache.to_str().unwrap(), &[INIT, INITED, call]);
+    assert!(second.contains("Fireball"), "{second}");
+    assert_eq!(
+        requests.load(Ordering::SeqCst),
+        1,
+        "second server hit the network"
+    );
+    let _ = std::fs::remove_dir_all(&dir);
 }

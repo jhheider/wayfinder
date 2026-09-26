@@ -1,15 +1,8 @@
 use serde_json::Value;
-use std::future::Future;
 use std::time::Duration;
 
 use super::models::Document;
-use super::query::SearchQuery;
 use crate::error::{Error, Result};
-
-/// Trait for searching AON documents, enabling mock implementations for tests.
-pub trait SearchClient: Send + Sync {
-    fn search(&self, query: &SearchQuery) -> impl Future<Output = Result<Vec<Document>>> + Send;
-}
 
 /// Game system endpoints.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -117,16 +110,14 @@ impl AonClient {
         })
     }
 
-    /// Execute a search query and return parsed documents.
-    pub async fn search(&self, query: &SearchQuery) -> Result<Vec<Document>> {
-        let body = query.build();
-        let raw = self.search_raw(&body).await?;
-        parse_documents(&raw)
+    /// The `_search` endpoint this client posts to.
+    pub fn endpoint(&self) -> &str {
+        &self.endpoint
     }
 
     /// Execute a raw JSON query body, returning the full response. Retries on
     /// 429/503 with exponential backoff (honoring `Retry-After` when present),
-    /// up to [`MAX_ATTEMPTS`] total requests.
+    /// up to three requests in all.
     pub async fn search_raw(&self, body: &Value) -> Result<Value> {
         let url = format!("{}?index={}", self.endpoint, self.system.index());
         let mut attempt = 0u32;
@@ -173,12 +164,6 @@ fn backoff_delay(retry_after: Option<&str>, attempt: u32) -> Duration {
     }
     let ms = 500u64.saturating_mul(1u64 << attempt.min(6));
     Duration::from_millis(ms).min(CAP)
-}
-
-impl SearchClient for AonClient {
-    async fn search(&self, query: &SearchQuery) -> Result<Vec<Document>> {
-        AonClient::search(self, query).await
-    }
 }
 
 /// Parse the `_source` of every hit in a raw AON/Elasticsearch response into

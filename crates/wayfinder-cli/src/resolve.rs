@@ -1,20 +1,16 @@
-//! Turning user input into categories, names, and paths.
+//! Turning user input into categories and names.
 
 use anyhow::{Result, bail};
 use colored::Colorize;
-use std::path::PathBuf;
 
-use wayfinder_core::aon::categories::ALL_CATEGORIES;
-use wayfinder_core::aon::client::GameSystem;
-use wayfinder_core::aon::parse::{
-    CategoryError, normalize_category, parse_compound, resolve_category,
-};
+use wayfinder_core::Wayfinder;
+use wayfinder_core::aon::parse::{CategoryError, parse_compound, resolve_category};
 
-use crate::cli::Cli;
-
-/// Resolve a category string, printing warnings/errors with color.
-pub fn cli_resolve_category(input: &str) -> Result<String> {
-    match resolve_category(input) {
+/// Resolve a category against the game's live list (see
+/// [`Wayfinder::resolve_category`]). A near miss is used with a warning; an
+/// unknown category is an error.
+pub async fn cli_resolve_category(wf: &Wayfinder, input: &str) -> Result<String> {
+    match wf.resolve_category(input).await {
         Ok(cat) => Ok(cat),
         Err(CategoryError::Suggested { input, suggestion }) => {
             eprintln!(
@@ -35,24 +31,9 @@ pub fn cli_resolve_category(input: &str) -> Result<String> {
     }
 }
 
-pub fn cache_path() -> PathBuf {
-    dirs::data_local_dir()
-        .unwrap_or_else(|| PathBuf::from("."))
-        .join("wayfinder")
-        .join("wayfinder_cache.db")
-}
-
-pub fn game_system(cli: &Cli) -> GameSystem {
-    if cli.sf2e {
-        GameSystem::Starfinder
-    } else {
-        GameSystem::Pathfinder
-    }
-}
-
 /// Whether `s` names a known AON category (normalizing plural/case).
 fn is_known_category(s: &str) -> bool {
-    ALL_CATEGORIES.contains(&normalize_category(s).as_str())
+    resolve_category(s).is_ok()
 }
 
 /// Resolve a `show` query into `(category, name)`, supporting all documented
@@ -82,6 +63,9 @@ mod tests {
         assert!(is_known_category("spell"));
         assert!(is_known_category("Spells"));
         assert!(is_known_category("deities"));
+        // Regression: "rules" de-pluralized to "rule", so `wf show rules Flanking`
+        // looked up the name "rules Flanking" in every category.
+        assert!(is_known_category("rules"));
         assert!(!is_known_category("wizardry"));
     }
 

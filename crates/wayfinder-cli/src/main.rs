@@ -6,12 +6,12 @@ use anyhow::{Context, Result};
 use clap::{CommandFactory, Parser};
 use colored::Colorize;
 
-use wayfinder_core::aon::AonClient;
-use wayfinder_core::search::SearchService;
+use wayfinder_core::Wayfinder;
+use wayfinder_core::aon::{AonClient, Edition, GameSystem};
+use wayfinder_core::cache::ResponseCache;
 
 use crate::cli::{Cli, Command};
 use crate::commands::{Ctx, cache, categories, search, show};
-use crate::resolve::{cache_path, game_system};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -36,18 +36,20 @@ async fn main() -> Result<()> {
         return Ok(());
     };
 
-    let system = game_system(&cli);
-    let cache = cache_path();
-    if let Some(parent) = cache.parent() {
-        std::fs::create_dir_all(parent)?;
-    }
-
-    let client = AonClient::from_env(system)?;
+    let system = if cli.sf2e {
+        GameSystem::Starfinder
+    } else {
+        GameSystem::Pathfinder
+    };
+    // The cache is an optimization: if it cannot open, say so and carry on.
+    let cache = ResponseCache::from_env().unwrap_or_else(|e| {
+        eprintln!("{} response cache unavailable: {e}", "⚠".yellow());
+        None
+    });
     let ctx = Ctx {
-        svc: SearchService::new(client, &cache),
-        system,
+        wf: Wayfinder::new(AonClient::from_env(system)?, cache.map(Into::into)),
         format: cli.format,
-        legacy: cli.legacy,
+        edition: Edition::legacy_if(cli.legacy),
         sys_label: if cli.sf2e {
             "🚀 SF2e".cyan().bold().to_string()
         } else {
@@ -56,26 +58,9 @@ async fn main() -> Result<()> {
     };
 
     match command {
-        Command::Categories => categories::categories(&ctx),
-        Command::Fields { category } => categories::fields(&ctx, &category)?,
-        Command::Search {
-            term,
-            name,
-            text,
-            filters,
-            level,
-            limit,
-        } => {
-            let args = search::Args {
-                term,
-                name,
-                text,
-                filters,
-                level,
-                limit,
-            };
-            search::run(&ctx, args).await?
-        }
+        Command::Categories => categories::categories(&ctx).await?,
+        Command::Fields { category } => categories::fields(&ctx, &category).await?,
+        Command::Search(args) => search::run(&ctx, *args).await?,
         Command::Show { query } => show::run(&ctx, &query).await?,
         Command::Cache { action } => cache::run(&ctx, action)?,
     }

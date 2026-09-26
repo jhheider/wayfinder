@@ -1,3 +1,3 @@
-pub mod store;
+mod responses;
 
-pub use store::CacheStore;
+pub use responses::{CACHE_ENV, DEFAULT_TTL, ResponseCache};

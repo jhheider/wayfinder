@@ -5,18 +5,16 @@ pub mod categories;
 pub mod search;
 pub mod show;
 
-use wayfinder_core::aon::AonClient;
-use wayfinder_core::aon::client::GameSystem;
-use wayfinder_core::search::SearchService;
+use wayfinder_core::Wayfinder;
+use wayfinder_core::aon::Edition;
 
 use crate::cli::OutputFormat;
 
-/// What every command needs: the service, the game, and output settings.
+/// What every command needs: the game's service and output settings.
 pub struct Ctx {
-    pub svc: SearchService<AonClient>,
-    pub system: GameSystem,
+    pub wf: Wayfinder,
     pub format: OutputFormat,
-    pub legacy: bool,
+    pub edition: Edition,
     /// Colored "⚔️  PF2e" / "🚀 SF2e" banner.
     pub sys_label: String,
 }

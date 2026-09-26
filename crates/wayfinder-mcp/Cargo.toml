@@ -34,7 +34,7 @@ pkg-fmt = "tgz"
 pkg-fmt = "zip"
 
 [dependencies]
-wayfinder-core = { workspace = true }
+wayfinder-core = { workspace = true , features = ["schemars"] }
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

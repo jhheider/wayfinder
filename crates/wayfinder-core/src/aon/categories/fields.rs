@@ -109,3 +109,67 @@ pub fn filterable_fields(category: &str) -> Option<&'static [&'static str]> {
         _ => return None,
     })
 }
+
+/// All valid filter field names (sorted union of filterable_fields across categories).
+pub const ALLOWED_FILTER_FIELDS: &[&str] = &[
+    "actions",
+    "alignment",
+    "archetype",
+    "archetype_category",
+    "area_of_concern",
+    "aspect",
+    "attack_proficiency",
+    "attribute",
+    "attribute_flaw",
+    "bloodline",
+    "cleric_spell",
+    "component",
+    "creature_ability",
+    "damage_type",
+    "defense_proficiency",
+    "deity",
+    "divine_font",
+    "domain",
+    "domain_alternate",
+    "domain_primary",
+    "element",
+    "familiar_ability",
+    "favored_weapon",
+    "feat",
+    "follower_alignment",
+    "heighten_group",
+    "hp",
+    "immunity",
+    "language",
+    "level",
+    "pantheon",
+    "patron_theme",
+    "rarity",
+    "sanctification",
+    "saving_throw",
+    "school",
+    "size",
+    "skill",
+    "skill_proficiency",
+    "spell",
+    "spell_type",
+    "strongest_save",
+    "tradition",
+    "trait",
+    "trait_group",
+    "weakest_save",
+];
+
+/// Check whether a field name is a known filterable field.
+pub fn is_valid_filter_field(field: &str) -> bool {
+    ALLOWED_FILTER_FIELDS.binary_search(&field).is_ok()
+}
+
+/// Check whether a field is valid for a specific category.
+/// Falls back to the global whitelist if the category has no field info.
+pub fn is_valid_filter_for_category(field: &str, category: &str) -> bool {
+    match filterable_fields(category) {
+        Some(fields) => fields.contains(&field),
+        None => is_valid_filter_field(field),
+    }
+}

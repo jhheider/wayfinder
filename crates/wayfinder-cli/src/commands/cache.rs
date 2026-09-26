@@ -3,31 +3,43 @@
 use anyhow::Result;
 use colored::Colorize;
 
-use wayfinder_core::aon::categories::category_icon;
-
 use super::Ctx;
 use crate::cli::CacheAction;
 
 pub fn run(ctx: &Ctx, action: CacheAction) -> Result<()> {
+    let Some(cache) = ctx.wf.cache() else {
+        println!("  {} Caching is off (WAYFINDER_CACHE).", "ℹ".blue());
+        return Ok(());
+    };
     match action {
         CacheAction::Purge => {
-            let deleted = ctx.svc.purge_expired()?;
+            let n = cache.purge_expired()?;
             println!(
-                "  {} Purged {} expired document(s).",
+                "  {} Purged {} expired response(s).",
                 "✓".green(),
-                deleted.to_string().bold()
+                n.to_string().bold()
+            );
+        }
+        CacheAction::Clear => {
+            let n = cache.clear()?;
+            println!(
+                "  {} Cleared {} response(s).",
+                "✓".green(),
+                n.to_string().bold()
             );
         }
         CacheAction::Status => {
-            let status = ctx.svc.cache_status()?;
+            let status = cache.status()?;
+            println!("Cache: {}", cache.path().display().to_string().dimmed());
             if status.is_empty() {
                 println!("  {} Cache is empty.", "ℹ".blue());
-            } else {
-                println!("{} Cache status:\n", ctx.sys_label);
-                for (cat, count) in &status {
-                    let icon = category_icon(cat);
-                    println!("  {icon} {}: {}", cat.bold(), count.to_string().cyan());
-                }
+            }
+            for (game, count) in &status {
+                println!(
+                    "  {}: {} fresh response(s)",
+                    game.bold(),
+                    count.to_string().cyan()
+                );
             }
         }
     }

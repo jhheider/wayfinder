@@ -1,8 +1,12 @@
-//! Tool parameter structs (the schemars-described MCP interface) and the
-//! game-selection parsing that maps them onto `wayfinder_core`'s `GameSystem`.
+//! Tool parameter structs (the schemars-described MCP interface) and their
+//! mapping onto `wayfinder_core`'s requests: `Search`, `Lookup`, `GameSystem`.
 
 use serde::Deserialize;
-use wayfinder_core::aon::GameSystem;
+use wayfinder_core::aon::{Edition, GameSystem, Lookup, Search, Sort};
+
+/// Most results one `search` returns: a model reads every line, so the
+/// ceiling is lower than core's.
+const MAX_LIMIT: u32 = 50;
 
 /// A curated set of common, broadly-useful categories, surfaced in tool hints.
 /// `list_categories` queries the live index for the authoritative set, so this
@@ -45,10 +49,6 @@ pub fn game_system(value: Option<&str>) -> Result<GameSystem, String> {
         Some(v) => v.parse(),
     }
 }
-
-/// Elasticsearch's default `index.max_result_window`: `from + size` may not
-/// exceed it.
-const MAX_WINDOW: u32 = 10_000;
 
 /// Parameters for the `search` tool. Every field is optional; an empty set
 /// returns the first page of all entries.
@@ -112,30 +112,24 @@ pub struct SearchParams {
     pub legacy: bool,
 }
 
-/// Result ordering for `search`.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Deserialize, schemars::JsonSchema)]
-#[serde(rename_all = "lowercase")]
-pub enum Sort {
-    /// Best match first.
-    #[default]
-    Relevance,
-    /// Lowest level/rank first, then relevance.
-    Level,
-    /// Alphabetical by name.
-    Name,
-}
-
 impl SearchParams {
-    /// Effective result limit, clamped to a sane range.
-    pub fn effective_limit(&self) -> u32 {
-        self.limit.unwrap_or(10).clamp(1, 50)
-    }
-
-    /// Effective offset. Elasticsearch refuses to page past 10,000 hits.
-    pub fn effective_offset(&self) -> u32 {
-        self.offset
-            .unwrap_or(0)
-            .min(MAX_WINDOW - self.effective_limit())
+    /// The core search these parameters ask for. `category` must already be
+    /// resolved (see `Wayfinder::resolve_category`).
+    pub fn to_search(&self, category: Option<String>) -> Search {
+        Search {
+            text: self.query.clone(),
+            category,
+            traits: self.traits.clone(),
+            min_level: self.min_level,
+            max_level: self.max_level,
+            source: self.source.clone(),
+            rarity: self.rarity.clone(),
+            edition: Edition::legacy_if(self.legacy),
+            sort: self.sort,
+            limit: Some(self.limit.unwrap_or(10).clamp(1, MAX_LIMIT)),
+            offset: self.offset.unwrap_or(0),
+            ..Search::default()
+        }
     }
 }
 
@@ -178,6 +172,18 @@ pub struct GetParams {
     pub legacy: bool,
 }
 
+impl GetParams {
+    /// The core lookup these parameters ask for, with `category` resolved.
+    pub fn to_lookup(&self, category: Option<String>) -> Lookup {
+        Lookup {
+            name: self.name.clone(),
+            url: self.url.clone(),
+            category,
+            edition: Edition::legacy_if(self.legacy),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -194,24 +200,30 @@ mod tests {
     }
 
     #[test]
-    fn limit_clamps() {
-        assert_eq!(SearchParams::default().effective_limit(), 10);
-        let p = SearchParams {
-            limit: Some(1000),
-            ..Default::default()
-        };
-        assert_eq!(p.effective_limit(), 50);
+    fn search_params_map_onto_core_search() {
+        let p: SearchParams = serde_json::from_str(
+            r#"{"query":"fire","traits":["fire"],"limit":1000,"offset":20,"legacy":true,"sort":"level"}"#,
+        )
+        .unwrap();
+        let s = p.to_search(Some("spell".into()));
+        assert_eq!(s.text.as_deref(), Some("fire"));
+        assert_eq!(s.category.as_deref(), Some("spell"));
+        assert_eq!(s.limit, Some(MAX_LIMIT));
+        assert_eq!(s.offset, 20);
+        assert_eq!(s.edition, Edition::Legacy);
+        assert_eq!(s.sort, Sort::Level);
+        assert_eq!(SearchParams::default().to_search(None).limit, Some(10));
     }
 
     #[test]
-    fn offset_stays_inside_the_result_window() {
-        let p = SearchParams {
-            offset: Some(20_000),
-            limit: Some(10),
+    fn get_params_map_onto_core_lookup() {
+        let p = GetParams {
+            name: Some("Heal".into()),
             ..Default::default()
         };
-        assert_eq!(p.effective_offset(), 9_990);
-        assert_eq!(SearchParams::default().effective_offset(), 0);
+        let l = p.to_lookup(None);
+        assert_eq!(l.name.as_deref(), Some("Heal"));
+        assert_eq!(l.edition, Edition::Remastered);
     }
 
     #[test]

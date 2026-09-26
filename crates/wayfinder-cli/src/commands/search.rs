@@ -3,55 +3,25 @@
 use anyhow::{Result, bail};
 use colored::Colorize;
 
-use wayfinder_core::aon::SearchQuery;
+use wayfinder_core::aon::Search;
+use wayfinder_core::aon::categories::{is_valid_filter_field, is_valid_filter_for_category};
 use wayfinder_core::aon::parse::parse_compound;
-use wayfinder_core::aon::query::{is_valid_filter_field, is_valid_filter_for_category};
+use wayfinder_core::aon::query::MAX_LIMIT;
 use wayfinder_core::render::display_short_colored;
-use wayfinder_core::search::{filter_legacy_duplicates, group_broad_results};
+use wayfinder_core::service::group_broad_results;
 
 use super::Ctx;
-use crate::cli::{MAX_FILTERS, MAX_INPUT_LEN, MAX_RESULT_LIMIT, OutputFormat};
+use crate::cli::{OutputFormat, SearchArgs};
 use crate::resolve::cli_resolve_category;
 
-/// The `search` subcommand's arguments.
-pub struct Args {
-    pub term: String,
-    pub name: Option<String>,
-    pub text: Option<String>,
-    pub filters: Vec<(String, String)>,
-    pub level: Option<i32>,
-    pub limit: u32,
-}
+/// Broad (uncategorized) terms shorter than this match too much to be useful.
+const MIN_BROAD_TERM: usize = 3;
 
-pub async fn run(ctx: &Ctx, args: Args) -> Result<()> {
-    let Args {
-        term,
-        name,
-        text,
-        filters,
-        level,
-        limit,
-    } = args;
-    if limit > MAX_RESULT_LIMIT {
-        bail!("Result limit cannot exceed {MAX_RESULT_LIMIT}.");
+pub async fn run(ctx: &Ctx, args: SearchArgs) -> Result<()> {
+    if args.limit > MAX_LIMIT {
+        bail!("Result limit cannot exceed {MAX_LIMIT}.");
     }
-    if term.len() > MAX_INPUT_LEN {
-        bail!("Search term exceeds maximum length of {MAX_INPUT_LEN} characters.");
-    }
-    if let Some(n) = &name
-        && n.len() > MAX_INPUT_LEN
-    {
-        bail!("--name value exceeds maximum length of {MAX_INPUT_LEN} characters.");
-    }
-    if let Some(t) = &text
-        && t.len() > MAX_INPUT_LEN
-    {
-        bail!("--text value exceeds maximum length of {MAX_INPUT_LEN} characters.");
-    }
-    if filters.len() > MAX_FILTERS {
-        bail!("Too many filters (maximum {MAX_FILTERS}).");
-    }
-    for (field, _) in &filters {
+    for (field, _) in &args.filters {
         if !is_valid_filter_field(field) {
             bail!(
                 "Unknown filter field '{}'. Run {} to see valid fields for a category.",
@@ -61,26 +31,26 @@ pub async fn run(ctx: &Ctx, args: Args) -> Result<()> {
         }
     }
 
-    let (category, search_name) = parse_compound(&term);
+    let (category, term) = parse_compound(&args.term);
+    let broad = category.is_none();
+    let mut search = Search {
+        traits: args.traits,
+        fields: args.filters,
+        min_level: args.level.or(args.min_level),
+        max_level: args.level.or(args.max_level),
+        source: args.source,
+        rarity: args.rarity,
+        edition: ctx.edition,
+        sort: args.sort.into(),
+        limit: Some(args.limit),
+        offset: args.offset,
+        full: matches!(ctx.format, OutputFormat::Json),
+        ..Search::default()
+    };
 
-    // Minimum query length for broad (unscoped) searches
-    if category.is_none()
-        && let Some(n) = &search_name
-        && n.len() < 3
-    {
-        bail!(
-            "Search query '{}' is too short (minimum 3 characters for broad searches). \
-             Use category/name syntax (e.g. 'deity/{}') for short queries.",
-            n.red(),
-            n
-        );
-    }
-
-    let mut q = SearchQuery::new().size(limit);
     if let Some(cat) = &category {
-        let cat = cli_resolve_category(cat)?;
-        // Category-aware filter validation
-        for (field, _) in &filters {
+        let cat = cli_resolve_category(&ctx.wf, cat).await?;
+        for (field, _) in &search.fields {
             if !is_valid_filter_for_category(field, &cat) {
                 bail!(
                     "Field '{}' is not a valid filter for category '{}'. Run {} to see valid fields.",
@@ -90,39 +60,39 @@ pub async fn run(ctx: &Ctx, args: Args) -> Result<()> {
                 );
             }
         }
-        q = q.category(&cat);
-        // Category-scoped: search by name
-        if let Some(n) = &search_name {
-            q = q.name(n);
+        search.category = Some(cat);
+        // Scoped: the term is a name phrase.
+        search.name = term.clone();
+    } else if let Some(t) = &term {
+        if t.len() < MIN_BROAD_TERM {
+            bail!(
+                "Search query '{}' is too short (minimum {MIN_BROAD_TERM} characters for broad \
+                 searches). Use category/name syntax (e.g. 'deity/{}') for short queries.",
+                t.red(),
+                t
+            );
         }
-    } else if let Some(n) = &search_name {
-        // Broad search: match across name and text fields
-        q = q.broad(n);
+        // Broad: the term is free text.
+        search.text = term.clone();
     }
-    if let Some(n) = &name {
-        q = q.name(n);
+    if let Some(n) = args.name {
+        if search.name.is_some() {
+            bail!("Give the name once: either category/name or --name.");
+        }
+        search.name = Some(n);
     }
-    if let Some(t) = &text {
-        q = q.text(t);
-    }
-    for (field, value) in &filters {
-        q = q.filter(field, value);
-    }
-    if let Some(l) = level {
-        q = q.filter("level", &l.to_string());
+    if let Some(t) = args.text {
+        if search.text.is_some() {
+            bail!("Give the text once: either a broad term or --text.");
+        }
+        search.text = Some(t);
     }
 
-    let mut results = ctx.svc.search(&q).await?;
-
-    results = filter_legacy_duplicates(results, ctx.legacy);
-
-    // For broad searches, group: exact name matches first (in ES order),
-    // then remaining results grouped by category (first-appearance order),
-    // preserving ES order within each category group.
-    if category.is_none()
-        && let Some(n) = &search_name
-    {
-        results = group_broad_results(results, n);
+    let page = ctx.wf.search(&search).await?;
+    let (offset, total, next) = (page.offset, page.total, page.next_offset());
+    let mut results = page.docs;
+    if broad && let Some(t) = &term {
+        results = group_broad_results(results, t);
     }
 
     match ctx.format {
@@ -137,12 +107,18 @@ pub async fn run(ctx: &Ctx, args: Args) -> Result<()> {
         OutputFormat::Pretty => {
             if results.is_empty() {
                 println!("  {} No results found.", "✗".red());
-            } else {
-                for doc in &results {
-                    println!("{}", display_short_colored(doc));
-                }
-                println!("\n{}", format!("{} result(s)", results.len()).dimmed());
+                return Ok(());
             }
+            for doc in &results {
+                println!("{}", display_short_colored(doc));
+            }
+            let first = offset + 1;
+            let last = offset as usize + results.len();
+            let mut footer = format!("showing {first}-{last} of {total}");
+            if let Some(next) = next {
+                footer.push_str(&format!(" (--offset {next} for more)"));
+            }
+            println!("\n{}", footer.dimmed());
         }
     }
     Ok(())

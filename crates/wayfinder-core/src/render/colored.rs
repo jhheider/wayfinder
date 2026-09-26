@@ -5,7 +5,6 @@ use colored::Colorize;
 use super::terminal::{Span, action_icon};
 use crate::aon::Document;
 use crate::aon::categories::category_icon;
-use crate::search::is_legacy;
 
 /// Render spans to colored terminal output with enhanced styling.
 pub fn render_spans_colored(spans: &[Span]) -> String {
@@ -75,7 +74,6 @@ pub fn display_short_colored(doc: &Document) -> String {
     let name = doc.name.as_deref().unwrap_or("Unknown");
     let cat = doc.category.as_deref().unwrap_or("");
     let cat_icon = category_icon(cat);
-    let rarity = doc.rarity.as_deref().unwrap_or("");
 
     let mut line = format!(
         "{} {} {}",
@@ -88,11 +86,11 @@ pub fn display_short_colored(doc: &Document) -> String {
         line.push_str(&format!(" {}", format!("Lvl {lvl}").cyan()));
     }
 
-    if is_legacy(doc) {
-        line.push_str(&format!(" {}", "legacy".dimmed().italic()));
+    if let Some(note) = doc.edition_note() {
+        line.push_str(&format!(" {}", note.dimmed().italic()));
     }
 
-    if !rarity.is_empty() && rarity != "common" {
+    if let Some(rarity) = doc.notable_rarity() {
         line.push_str(&format!(" {}", rarity_colored(rarity)));
     }
 

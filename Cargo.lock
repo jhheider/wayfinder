@@ -1959,11 +1959,13 @@ name = "wayfinder-core"
 version = "0.1.1"
 dependencies = [
  "colored",
+ "dirs",
  "html-escape",
  "indexmap",
  "reqwest",
  "rusqlite",
  "rustls",
+ "schemars",
  "serde",
  "serde_json",
  "tempfile",

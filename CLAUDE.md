@@ -5,9 +5,12 @@ Starfinder 2e game data. One AON client library, two frontends (a CLI and an
 MCP server).
 
 ## Project Structure
-- **wayfinder-core** -- library: AON Elasticsearch client, SQLite cache, search,
-  rendering, domain types. The single source of truth for AON access; the CLI
-  and MCP server both consume it.
+- **wayfinder-core** -- library: AON Elasticsearch client, the `Wayfinder`
+  service, SQLite response cache, rendering, domain types. The single source of
+  truth for AON access AND policy (what a search/lookup sends, remaster
+  handling, category resolution, picking among same-named entries, caching);
+  the CLI and MCP server only map their input onto it and lay out its output.
+  New behavior goes in core so both frontends get it.
 - **wayfinder-cli** (bin: `wf`) -- human-facing terminal tool for searching and
   browsing AON data (colorized output, cache management).
 - **wayfinder-mcp** (bin: `wayfinder-mcp`) -- MCP server exposing AON data to LLM
@@ -22,11 +25,11 @@ MCP server).
 cargo build --workspace
 cargo clippy --workspace --all-targets --all-features   # -D warnings in CI
 cargo test --workspace
-cargo run -p wayfinder-cli -- search deity -f domain=Dragon
+cargo run -p wayfinder-cli -- search deity/ -f domain=Dragon
 cargo run -p wayfinder-cli -- show spell Fireball
 cargo run -p wayfinder-cli -- categories
-cargo run -p wayfinder-cli -- --sf2e search class
-cargo run -p wayfinder-cli -- --format json search spell --name Fireball
+cargo run -p wayfinder-cli -- --sf2e search class/
+cargo run -p wayfinder-cli -- --format json search spell/Fireball
 cargo run -p wayfinder-cli -- cache status
 # Drive the MCP server (stdio JSON-RPC):
 cargo run -p wayfinder-mcp
@@ -83,23 +86,26 @@ packager doc generation (`gen-docs: true`).
 - `aon::client` -- `AonClient` (+ `search_raw` for custom ES bodies, and the
   public `parse_documents` / `parse_total` helpers; `from_env` honors
   `WAYFINDER_AON_ENDPOINT`), `GameSystem` (PF2e/SF2e, `FromStr` for game names)
-- `aon::query` -- `SearchQuery` builder (CLI-oriented)
-- `aon::models` -- `Document` serde struct with `#[serde(flatten)]` extra fields
+- `aon::query` -- `Search` (every search filter, `Edition`, `Sort`, paging,
+  validation) → ES body; `categories_body`
+- `aon::lookup` -- `Lookup` (by name or URL) and `pick` (exact current name,
+  then legacy name, then likely category; keeps the other same-named entries)
+- `aon::models` -- `Document` serde struct with `#[serde(flatten)]` extra fields,
+  plus shared helpers (`is_legacy`, `edition_note`, `absolute_url`,
+  `notable_rarity`, `content`)
 - `aon::categories` -- known categories, grouped hierarchy, filterable fields
 - `aon::parse` -- category resolution, fuzzy suggestion, compound parsing
-- `cache::store` -- `CacheStore` SQLite layer with TTL
+- `cache` -- `ResponseCache`: SQLite (WAL) cache of raw responses keyed by
+  endpoint + index + request body, 24h TTL, shared by every process;
+  `WAYFINDER_CACHE` = a path or `off`. Tests must set it (a temp path or `off`).
 - `render` -- AON HTML/markdown → content blocks / `Vec<Span>`; colorize is opt-in
-- `search` -- unified `SearchService` (cache + client); results are cached
-  opportunistically as you query (no bulk category mirroring)
+- `service` -- `Wayfinder` (search, lookup, cached live categories,
+  `resolve_category` with built-in fallback offline) and `group_broad_results`
 
 ## wayfinder-mcp notes
-- Keeps its own MCP-tuned ES query builders (`query.rs`: sort, paging, level
-  range, legacy/remaster `must_not`, `_source` projection, category
-  aggregation) and param structs (`params.rs`, schemars-described), but routes
-  ALL network I/O, the document model and markdown rendering through
-  `wayfinder-core` -- no duplicated AON client.
-- `game.rs` caches each game's live category list (validates `category`);
-  `pick.rs` chooses among `get` candidates that share a name.
+- `params.rs` holds the schemars-described tool params and maps them onto core
+  `Search`/`Lookup` (core's `schemars` feature derives `Sort`'s schema);
+  `format.rs` lays results out for a model. No queries or AON logic here.
 - Tool bodies return `anyhow::Result<String>`; `respond` turns failures into
   `isError` tool results (which the model sees), not JSON-RPC errors.
 - `rmcp` 2.x: tool results use `ContentBlock` (not `Content`).

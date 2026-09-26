@@ -1,7 +1,11 @@
 //! The MCP server: tool definitions and the `ServerHandler` implementation.
 //!
-//! All AON network I/O and the document model come from `wayfinder_core`; this
-//! crate only builds queries, selects a game, and formats results for the model.
+//! Everything about talking to AON (requests, caching, remaster handling,
+//! category resolution, picking among same-named entries) is
+//! `wayfinder_core::Wayfinder`, shared with the `wf` CLI. This crate maps
+//! tool parameters onto it and lays results out for a model.
+
+use std::sync::Arc;
 
 use anyhow::{Context, bail};
 use rmcp::handler::server::router::tool::ToolRouter;
@@ -9,19 +13,18 @@ use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::{CallToolResult, ContentBlock, Implementation, ServerCapabilities, ServerInfo};
 use rmcp::{ErrorData, ServerHandler, tool, tool_handler, tool_router};
 
-use wayfinder_core::aon::{AonClient, GameSystem, parse_documents, parse_total};
+use wayfinder_core::Wayfinder;
+use wayfinder_core::aon::{AonClient, CategoryError, GameSystem};
+use wayfinder_core::cache::ResponseCache;
 
 use crate::format::{format_alternatives, format_detail, format_summary};
-use crate::game::Game;
 use crate::params::{GameParams, GetParams, SearchParams, common_categories_hint, game_system};
-use crate::pick::pick;
-use crate::query::{build_get_query, build_search_query};
 
 /// Pathfinder 2e / Starfinder 2e MCP server backed by Archives of Nethys.
 #[derive(Clone)]
 pub struct WayfinderServer {
-    pf2e: Game,
-    sf2e: Game,
+    pf2e: Arc<Wayfinder>,
+    sf2e: Arc<Wayfinder>,
     tool_router: ToolRouter<Self>,
 }
 
@@ -37,17 +40,31 @@ fn respond(outcome: anyhow::Result<String>) -> Result<CallToolResult, ErrorData>
 
 #[tool_router]
 impl WayfinderServer {
-    /// Construct the server with AoN clients for both games.
+    /// Construct the server: a service per game, sharing one response cache
+    /// (and the file the `wf` CLI uses, unless `WAYFINDER_CACHE` says otherwise).
     pub fn new() -> anyhow::Result<Self> {
+        let cache = match ResponseCache::from_env() {
+            Ok(cache) => cache.map(Arc::new),
+            Err(e) => {
+                tracing::warn!("response cache unavailable, continuing without: {e}");
+                None
+            }
+        };
+        let game = |system| -> anyhow::Result<Arc<Wayfinder>> {
+            Ok(Arc::new(Wayfinder::new(
+                AonClient::from_env(system)?,
+                cache.clone(),
+            )))
+        };
         Ok(Self {
-            pf2e: Game::new(AonClient::from_env(GameSystem::Pathfinder)?),
-            sf2e: Game::new(AonClient::from_env(GameSystem::Starfinder)?),
+            pf2e: game(GameSystem::Pathfinder)?,
+            sf2e: game(GameSystem::Starfinder)?,
             tool_router: Self::tool_router(),
         })
     }
 
     /// Resolve the requested game (defaults to Pathfinder 2e).
-    fn game(&self, game: Option<&str>) -> anyhow::Result<&Game> {
+    fn game(&self, game: Option<&str>) -> anyhow::Result<&Wayfinder> {
         Ok(match game_system(game).map_err(anyhow::Error::msg)? {
             GameSystem::Pathfinder => &self.pf2e,
             GameSystem::Starfinder => &self.sf2e,
@@ -69,34 +86,25 @@ impl WayfinderServer {
         respond(self.run_search(params).await)
     }
 
-    async fn run_search(&self, mut params: SearchParams) -> anyhow::Result<String> {
-        let game = self.game(params.game.as_deref())?;
-        if let Some(category) = &params.category {
-            params.category = game.resolve_category(category).await?;
-        }
-        if let (Some(min), Some(max)) = (params.min_level, params.max_level)
-            && min > max
-        {
-            bail!("min_level ({min}) is greater than max_level ({max})");
-        }
-        let raw = game.client.search_raw(&build_search_query(&params)).await?;
-        let entries = parse_documents(&raw)?;
-        if entries.is_empty() {
+    async fn run_search(&self, params: SearchParams) -> anyhow::Result<String> {
+        let wf = self.game(params.game.as_deref())?;
+        let category = resolve_category(wf, params.category.as_deref()).await?;
+        let page = wf.search(&params.to_search(category)).await?;
+        if page.docs.is_empty() {
             return Ok("No results found. Try a broader query or fewer filters.".to_string());
         }
 
-        let total = parse_total(&raw).unwrap_or(0);
-        let first = params.effective_offset() as usize + 1;
-        let last = first + entries.len() - 1;
-        let mut out = format!("Found {total} match(es); showing {first}-{last}");
-        if (last as i64) < total {
-            out.push_str(&format!(" (pass offset={last} for more)"));
+        let first = page.offset as usize + 1;
+        let last = page.offset as usize + page.docs.len();
+        let mut out = format!("Found {} match(es); showing {first}-{last}", page.total);
+        if let Some(next) = page.next_offset() {
+            out.push_str(&format!(" (pass offset={next} for more)"));
         }
         out.push_str(":\n");
-        let base = game.client.system.base_url();
-        for (i, e) in entries.iter().enumerate() {
+        let base = wf.system().base_url();
+        for (i, doc) in page.docs.iter().enumerate() {
             out.push('\n');
-            out.push_str(&format_summary(first + i, e, base));
+            out.push_str(&format_summary(first + i, doc, base));
         }
         Ok(out)
     }
@@ -116,23 +124,10 @@ impl WayfinderServer {
         respond(self.run_get(params).await)
     }
 
-    async fn run_get(&self, mut params: GetParams) -> anyhow::Result<String> {
-        let game = self.game(params.game.as_deref())?;
-        if let Some(category) = &params.category {
-            params.category = game.resolve_category(category).await?;
-        }
-        let base = game.client.system.base_url();
-        let body = build_get_query(&params, base).map_err(anyhow::Error::msg)?;
-        let candidates = parse_documents(&game.client.search_raw(&body).await?)?;
-
-        let by_url = params.url.as_deref().is_some_and(|u| !u.trim().is_empty());
-        let name = params.name.as_deref().unwrap_or_default();
-        let picked = if by_url {
-            candidates.into_iter().next().map(|best| (best, Vec::new()))
-        } else {
-            pick(name, candidates).map(|p| (p.best, p.same_name))
-        };
-        let Some((best, same_name)) = picked else {
+    async fn run_get(&self, params: GetParams) -> anyhow::Result<String> {
+        let wf = self.game(params.game.as_deref())?;
+        let category = resolve_category(wf, params.category.as_deref()).await?;
+        let Some(picked) = wf.lookup(&params.to_lookup(category)).await? else {
             return Ok(
                 "No matching entry found. Check the spelling, try the `search` tool, \
                        or drop `category`."
@@ -140,12 +135,13 @@ impl WayfinderServer {
             );
         };
 
-        let mut out = format_detail(&best, base);
-        if !same_name.is_empty() {
+        let base = wf.system().base_url();
+        let mut out = format_detail(&picked.best, base);
+        if !picked.same_name.is_empty() {
             out.push_str(&format!(
                 "\n---\nOther entries named \"{}\" (pass `category` or `url` to get one):\n{}",
-                name.trim(),
-                format_alternatives(&same_name, base)
+                params.name.as_deref().unwrap_or_default().trim(),
+                format_alternatives(&picked.same_name, base)
             ));
         }
         Ok(out)
@@ -165,20 +161,40 @@ impl WayfinderServer {
     }
 
     async fn run_list_categories(&self, params: GameParams) -> anyhow::Result<String> {
-        let game = self.game(params.game.as_deref())?;
-        let cats = game
+        let wf = self.game(params.game.as_deref())?;
+        let cats = wf
             .categories()
             .await
             .context("could not fetch categories from Archives of Nethys")?;
         let mut out = format!(
             "{} categories on {} (name: entry count):\n",
             cats.len(),
-            game.client.system.label()
+            wf.system().label()
         );
         for (name, count) in cats {
             out.push_str(&format!("\n- {name}: {count}"));
         }
         Ok(out)
+    }
+}
+
+/// Resolve an optional `category` argument. A near miss is an error naming
+/// the suggestion rather than a silent substitution: the model should know
+/// what it actually searched.
+async fn resolve_category(wf: &Wayfinder, input: Option<&str>) -> anyhow::Result<Option<String>> {
+    let Some(input) = input.map(str::trim).filter(|s| !s.is_empty()) else {
+        return Ok(None);
+    };
+    let label = wf.system().label();
+    match wf.resolve_category(input).await {
+        Ok(cat) => Ok(Some(cat)),
+        Err(CategoryError::Suggested { input, suggestion }) => bail!(
+            "unknown {label} category {input:?}; did you mean {suggestion:?}? \
+             `list_categories` lists them all"
+        ),
+        Err(CategoryError::Unknown(input)) => {
+            bail!("unknown {label} category {input:?}; `list_categories` lists them all")
+        }
     }
 }
 

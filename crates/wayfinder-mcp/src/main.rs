@@ -5,10 +5,7 @@
 //! exposes three tools over stdio JSON-RPC: `search`, `get`, `list_categories`.
 
 mod format;
-mod game;
 mod params;
-mod pick;
-mod query;
 mod server;
 
 use anyhow::Context;

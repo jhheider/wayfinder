@@ -3,7 +3,9 @@
 mod fields;
 mod suggest;
 
-pub use fields::filterable_fields;
+pub use fields::{
+    ALLOWED_FILTER_FIELDS, filterable_fields, is_valid_filter_field, is_valid_filter_for_category,
+};
 pub use suggest::{suggest_category, suggest_from};
 
 /// All known AON category keys.

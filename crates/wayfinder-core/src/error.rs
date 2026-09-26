@@ -28,7 +28,11 @@ pub enum Error {
     #[error("unexpected Archives of Nethys response: {0}")]
     UnexpectedResponse(String),
 
-    /// The local SQLite document cache failed.
+    /// A request was malformed (bad range, overlong input, missing name).
+    #[error("invalid request: {0}")]
+    InvalidInput(String),
+
+    /// The local SQLite response cache failed.
     #[error("cache error: {0}")]
     Cache(#[from] rusqlite::Error),
 }
