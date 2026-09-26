@@ -1,6 +1,8 @@
 //! Tool parameter structs (the schemars-described MCP interface) and their
 //! mapping onto `wayfinder_core`'s requests: `Search`, `Lookup`, `GameSystem`.
 
+use std::collections::BTreeMap;
+
 use serde::Deserialize;
 use wayfinder_core::aon::{Edition, GameSystem, Lookup, Search, Sort};
 
@@ -75,6 +77,12 @@ pub struct SearchParams {
     #[serde(default)]
     pub traits: Vec<String>,
 
+    /// Exact-match filters on other indexed fields, e.g. {"tradition": "arcane"}
+    /// for spells or {"domain": "dragon"} for deities. Values are matched
+    /// case-insensitively. Which fields exist depends on the category.
+    #[serde(default)]
+    pub filters: BTreeMap<String, String>,
+
     /// Minimum level/rank, inclusive (spells use rank; creatures use level).
     #[serde(default)]
     pub min_level: Option<i64>,
@@ -120,6 +128,11 @@ impl SearchParams {
             text: self.query.clone(),
             category,
             traits: self.traits.clone(),
+            fields: self
+                .filters
+                .iter()
+                .map(|(k, v)| (k.trim().to_string(), v.trim().to_string()))
+                .collect(),
             min_level: self.min_level,
             max_level: self.max_level,
             source: self.source.clone(),
@@ -202,12 +215,13 @@ mod tests {
     #[test]
     fn search_params_map_onto_core_search() {
         let p: SearchParams = serde_json::from_str(
-            r#"{"query":"fire","traits":["fire"],"limit":1000,"offset":20,"legacy":true,"sort":"level"}"#,
+            r#"{"query":"fire","traits":["fire"],"filters":{"tradition":" arcane "},"limit":1000,"offset":20,"legacy":true,"sort":"level"}"#,
         )
         .unwrap();
         let s = p.to_search(Some("spell".into()));
         assert_eq!(s.text.as_deref(), Some("fire"));
         assert_eq!(s.category.as_deref(), Some("spell"));
+        assert_eq!(s.fields, [("tradition".to_string(), "arcane".to_string())]);
         assert_eq!(s.limit, Some(MAX_LIMIT));
         assert_eq!(s.offset, 20);
         assert_eq!(s.edition, Edition::Legacy);
