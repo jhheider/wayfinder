@@ -9,6 +9,7 @@ description = "wf: a terminal tool for searching and browsing Pathfinder 2e / St
 readme = "README.md"
 keywords = ["pathfinder", "starfinder", "ttrpg", "nethys", "cli"]
 categories = ["command-line-utilities", "games"]
+rust-version.workspace = true
 
 [[bin]]
 name = "wf"

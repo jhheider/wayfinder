@@ -9,6 +9,7 @@ description = "MCP server exposing Archives of Nethys Pathfinder 2e / Starfinder
 readme = "README.md"
 keywords = ["pathfinder", "starfinder", "mcp", "nethys", "llm"]
 categories = ["command-line-utilities", "api-bindings"]
+rust-version.workspace = true
 
 [[bin]]
 name = "wayfinder-mcp"

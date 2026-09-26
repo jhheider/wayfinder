@@ -9,6 +9,7 @@ description = "Client, cache, search, and rendering for Archives of Nethys Pathf
 readme = "README.md"
 keywords = ["pathfinder", "starfinder", "ttrpg", "nethys", "elasticsearch"]
 categories = ["api-bindings", "caching", "game-development"]
+rust-version.workspace = true
 
 [dependencies]
 reqwest = { workspace = true }
