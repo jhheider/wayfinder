@@ -72,8 +72,8 @@ implements `--manpage`/`--completions` for packager doc generation
 normal CI) against live AON every Monday and opens an `aon-canary` issue when
 it fails. When AON changes something wayfinder assumes (index names, remaster
 fields, category keys), add a check there. MSRV (`rust-version` in the
-workspace) comes from `cargo msrv find --min 1.85`: cargo-msrv 0.19 cannot
-read an inherited `edition` and otherwise bisects from 1.48.
+workspace) comes from `cargo msrv find --min 2024 --path crates/<name>` per
+crate (see the global CLAUDE.md for why the flags are needed).
 
 ## Data Sources
 - **PF2e**: `POST https://elasticsearch.aonprd.com/aon/_search` → index `aon70`
