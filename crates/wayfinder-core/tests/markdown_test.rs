@@ -1,5 +1,5 @@
 use wayfinder_core::render::content::{ContentBlock, InlineContent};
-use wayfinder_core::render::markdown::render_markdown;
+use wayfinder_core::render::markdown::{render_markdown, render_markdown_unlinked};
 
 #[test]
 fn title_renders_as_heading() {
@@ -122,4 +122,24 @@ fn inline_formatting() {
     assert!(md.contains("[link](https://example.com)"));
     assert!(md.contains("[Fire]"));
     assert!(md.contains("(Single Action)"));
+}
+
+#[test]
+fn unlinked_keeps_link_text_only() {
+    let blocks = vec![ContentBlock::Paragraph {
+        content: vec![
+            InlineContent::Text {
+                text: "Deals ".into(),
+            },
+            InlineContent::Link {
+                text: "fire".into(),
+                url: "https://2e.aonprd.com/Traits.aspx?ID=72".into(),
+            },
+            InlineContent::Text {
+                text: " damage.".into(),
+            },
+        ],
+    }];
+    assert_eq!(render_markdown_unlinked(&blocks), "Deals fire damage.");
+    assert!(render_markdown(&blocks).contains("[fire](https://"));
 }
