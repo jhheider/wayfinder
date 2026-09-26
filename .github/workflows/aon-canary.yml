@@ -34,6 +34,7 @@ jobs:
       - name: Run live checks
         id: live
         env:
+          CARGO_TERM_COLOR: never
           WAYFINDER_AON_ENDPOINT: ${{ inputs.endpoint }}
         run: cargo test -p wayfinder-core --test live_test -- --ignored 2>&1 | tee live.log
       - name: Open an issue unless one is open
@@ -55,7 +56,8 @@ jobs:
             echo "Run \`cargo test -p wayfinder-core --test live_test -- --ignored\` locally to dig in."
             echo
             echo '```'
-            grep -E "panicked|FAILED|test result|error" live.log | tail -40
+            # The failures section: each failing test and its panic message.
+            sed -n '/^failures:$/,/^test result/p' live.log | grep -v '^note: ' | head -80
             echo '```'
           } > body.md
           gh issue create --title "AON canary: live checks failing" \
