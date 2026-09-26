@@ -169,3 +169,17 @@ async fn resolve_category_falls_back_to_builtin_list_offline() {
     // "deity" is not in the mock's live list but is built in.
     assert_eq!(wf.resolve_category("deities").await, Ok("deity".into()));
 }
+
+#[test]
+fn page_total_label_marks_elasticsearch_lower_bounds() {
+    // Regression: an unfiltered PF2e search said "Found 10000 match(es)";
+    // Elasticsearch stops counting there (the index holds ~39k).
+    let page = |total| wayfinder_core::Page {
+        total,
+        offset: 0,
+        docs: Vec::new(),
+    };
+    assert_eq!(page(634).total_label(), "634");
+    assert!(!page(634).total_is_lower_bound());
+    assert_eq!(page(10_000).total_label(), "10000+");
+}

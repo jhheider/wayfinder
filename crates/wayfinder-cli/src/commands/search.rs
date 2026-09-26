@@ -89,7 +89,7 @@ pub async fn run(ctx: &Ctx, args: SearchArgs) -> Result<()> {
     }
 
     let page = ctx.wf.search(&search).await?;
-    let (offset, total, next) = (page.offset, page.total, page.next_offset());
+    let (offset, total, next) = (page.offset, page.total_label(), page.next_offset());
     let mut results = page.docs;
     if broad && let Some(t) = &term {
         results = group_broad_results(results, t);

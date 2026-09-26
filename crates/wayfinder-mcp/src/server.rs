@@ -102,7 +102,10 @@ impl WayfinderServer {
 
         let first = page.offset as usize + 1;
         let last = page.offset as usize + page.docs.len();
-        let mut out = format!("Found {} match(es); showing {first}-{last}", page.total);
+        let mut out = format!(
+            "Found {} match(es); showing {first}-{last}",
+            page.total_label()
+        );
         if let Some(next) = page.next_offset() {
             out.push_str(&format!(" (pass offset={next} for more)"));
         }

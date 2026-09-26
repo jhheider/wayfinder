@@ -21,14 +21,34 @@ use crate::error::{Error, Result};
 /// One page of search results.
 #[derive(Debug, Clone)]
 pub struct Page {
-    /// Matches in the whole index (not just this page).
+    /// Matches in the whole index (not just this page). Elasticsearch stops
+    /// counting at 10,000, so check [`Page::total_is_lower_bound`].
     pub total: u64,
     /// How many matches precede this page.
     pub offset: u32,
     pub docs: Vec<Document>,
 }
 
+/// Elasticsearch's default `track_total_hits`: it counts matches up to this
+/// many and then reports the total as "at least this".
+const TOTAL_HITS_TRACKED: u64 = 10_000;
+
 impl Page {
+    /// Whether [`Page::total`] is only a lower bound (Elasticsearch stopped
+    /// counting). An exact total of 10,000 also reads as one.
+    pub fn total_is_lower_bound(&self) -> bool {
+        self.total >= TOTAL_HITS_TRACKED
+    }
+
+    /// The total for display: `"634"`, or `"10000+"` when it is a lower bound.
+    pub fn total_label(&self) -> String {
+        if self.total_is_lower_bound() {
+            format!("{}+", self.total)
+        } else {
+            self.total.to_string()
+        }
+    }
+
     /// The offset of the next page, if there are more matches.
     pub fn next_offset(&self) -> Option<u32> {
         let end = self.offset as u64 + self.docs.len() as u64;
