@@ -7,8 +7,9 @@ fn parse_documents_extracts_each_source() {
         {"_source": {"name": "Fireball", "category": "spell", "level": 3}},
         {"_source": {"name": "Shield", "category": "spell", "level": "1"}}
     ]}});
-    let docs = parse_documents(&resp).unwrap();
+    let (docs, skipped) = parse_documents(&resp).unwrap();
     assert_eq!(docs.len(), 2);
+    assert_eq!(skipped, 0);
     assert_eq!(docs[0].name.as_deref(), Some("Fireball"));
     assert_eq!(docs[0].level, Some(3));
     // level "1" as a string is tolerated by the model.
@@ -21,10 +22,42 @@ fn parse_documents_errors_when_hits_missing() {
 }
 
 #[test]
-fn parse_documents_errors_on_malformed_source() {
-    // `name` is a String field; a number cannot deserialize into it.
-    let resp = json!({"hits": {"hits": [{"_source": {"name": 123}}]}});
-    assert!(parse_documents(&resp).is_err());
+fn parse_documents_skips_a_malformed_hit() {
+    // `name` is a String field; a number cannot deserialize into it. One such
+    // hit (as an uncovered AON category can produce) must not sink the page.
+    let resp = json!({"hits": {"hits": [
+        {"_source": {"name": "Fireball", "category": "spell"}},
+        {"_source": {"name": 123}},
+        {"_source": {"name": "Shield", "category": "spell"}}
+    ]}});
+    let (docs, skipped) = parse_documents(&resp).unwrap();
+    assert_eq!(skipped, 1);
+    assert_eq!(docs.len(), 2);
+    assert_eq!(docs[0].name.as_deref(), Some("Fireball"));
+    assert_eq!(docs[1].name.as_deref(), Some("Shield"));
+}
+
+#[test]
+fn parse_documents_skips_a_bare_string_array_field() {
+    // `source` is a `Vec<String>`; AON returns a bare string for some
+    // categories, the same inconsistency `level` already needs tolerance for.
+    let resp = json!({"hits": {"hits": [
+        {"_source": {"name": "Shield", "source": "Core Rulebook"}},
+        {"_source": {"name": "Fireball", "source": ["Core Rulebook"]}}
+    ]}});
+    let (docs, skipped) = parse_documents(&resp).unwrap();
+    assert_eq!(skipped, 1);
+    assert_eq!(docs.len(), 1);
+    assert_eq!(docs[0].name.as_deref(), Some("Fireball"));
+}
+
+#[test]
+fn parse_documents_is_empty_when_no_hit_parses() {
+    // All bad hits: an empty page, not an error, and every hit is counted.
+    let resp = json!({"hits": {"hits": [{"_id": "1"}, {"_source": {"name": 123}}]}});
+    let (docs, skipped) = parse_documents(&resp).unwrap();
+    assert!(docs.is_empty());
+    assert_eq!(skipped, 2);
 }
 
 #[test]

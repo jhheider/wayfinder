@@ -104,10 +104,11 @@ impl Wayfinder {
     /// Run a search.
     pub async fn search(&self, search: &Search) -> Result<Page> {
         let raw = self.raw(&search.body()?).await?;
+        let (docs, _skipped) = parse_documents(&raw)?;
         Ok(Page {
             total: parse_total(&raw).unwrap_or(0).max(0) as u64,
             offset: search.effective_offset(),
-            docs: parse_documents(&raw)?,
+            docs,
         })
     }
 
@@ -115,7 +116,7 @@ impl Wayfinder {
     /// candidate (see [`pick`]) and the others sharing its name.
     pub async fn lookup(&self, lookup: &Lookup) -> Result<Option<Pick>> {
         let raw = self.raw(&lookup.body(self.system().base_url())?).await?;
-        let docs = parse_documents(&raw)?;
+        let (docs, _skipped) = parse_documents(&raw)?;
         Ok(match (lookup.by_url(), &lookup.name) {
             (None, Some(name)) => pick(name, docs),
             _ => docs.into_iter().next().map(|best| Pick {
