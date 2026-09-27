@@ -82,7 +82,9 @@ crate (see the global CLAUDE.md for why the flags are needed).
   `aonsf10` (~6k docs, 52 categories), base site `https://2e.aonsrd.com`.
 - Category field is `keyword` (use `term` queries, lowercase singular: `spell`,
   `deity`). `level` may arrive as a number OR a numeric string -- `Document`
-  deserializes it tolerantly.
+  deserializes it tolerantly. Some categories also return a bare string where
+  `Document` expects an array; `parse_documents` skips (and counts) such hits
+  rather than failing the whole page.
 
 ## CLI Output Formats
 - `--format pretty` (default): colorized terminal with emoji, styled text

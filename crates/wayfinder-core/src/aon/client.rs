@@ -167,18 +167,34 @@ fn backoff_delay(retry_after: Option<&str>, attempt: u32) -> Duration {
 }
 
 /// Parse the `_source` of every hit in a raw AON/Elasticsearch response into
-/// [`Document`]s. Public so consumers that post custom query bodies via
-/// [`AonClient::search_raw`] can reuse the same parsing.
-pub fn parse_documents(response: &Value) -> Result<Vec<Document>> {
+/// [`Document`]s, returning them alongside the number of hits skipped. Public
+/// so consumers that post custom query bodies via [`AonClient::search_raw`] can
+/// reuse the same parsing.
+///
+/// A hit that cannot be parsed is skipped rather than failing the batch: AON's
+/// categories disagree on field shapes (an array field arrives as a bare string
+/// for some, as `level` does), and only a sample of them is covered locally, so
+/// one odd category must not turn a whole search into an error. Skipped counts
+/// hits with no `_source` and hits whose `_source` does not deserialize into a
+/// [`Document`]. Only a response missing `hits.hits` altogether is an error.
+pub fn parse_documents(response: &Value) -> Result<(Vec<Document>, usize)> {
     let hits = response
         .pointer("/hits/hits")
         .and_then(|v| v.as_array())
         .ok_or_else(|| Error::UnexpectedResponse("missing hits.hits".to_string()))?;
 
-    hits.iter()
-        .filter_map(|hit| hit.get("_source"))
-        .map(|src| serde_json::from_value::<Document>(src.clone()).map_err(Error::from))
-        .collect()
+    let mut documents = Vec::with_capacity(hits.len());
+    let mut skipped = 0;
+    for hit in hits {
+        match hit
+            .get("_source")
+            .and_then(|src| serde_json::from_value::<Document>(src.clone()).ok())
+        {
+            Some(document) => documents.push(document),
+            None => skipped += 1,
+        }
+    }
+    Ok((documents, skipped))
 }
 
 /// Total number of matches reported by a raw AON/Elasticsearch response

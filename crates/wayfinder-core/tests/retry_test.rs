@@ -45,7 +45,7 @@ fn client(url: String) -> AonClient {
 #[tokio::test]
 async fn succeeds_on_first_try() {
     let c = client(mock_endpoint(vec![200]).await);
-    let docs = parse_documents(&c.search_raw(&json!({})).await.unwrap()).unwrap();
+    let (docs, _) = parse_documents(&c.search_raw(&json!({})).await.unwrap()).unwrap();
     assert_eq!(docs.len(), 1);
     assert_eq!(docs[0].name.as_deref(), Some("Fireball"));
 }
@@ -53,7 +53,7 @@ async fn succeeds_on_first_try() {
 #[tokio::test]
 async fn retries_on_429_then_succeeds() {
     let c = client(mock_endpoint(vec![429, 200]).await);
-    let docs = parse_documents(&c.search_raw(&json!({})).await.unwrap()).unwrap();
+    let (docs, _) = parse_documents(&c.search_raw(&json!({})).await.unwrap()).unwrap();
     assert_eq!(docs.len(), 1);
 }
 
