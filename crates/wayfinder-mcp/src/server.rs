@@ -10,7 +10,7 @@ use std::sync::Arc;
 use anyhow::{Context, bail};
 use rmcp::handler::server::router::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
-use rmcp::model::{CallToolResult, ContentBlock, Implementation, ServerCapabilities, ServerInfo};
+use rmcp::model::{CallToolResult, ContentBlock, Implementation, ServerCapabilities, ServerConfig};
 use rmcp::{ErrorData, ServerHandler, tool, tool_handler, tool_router};
 
 use wayfinder_core::Wayfinder;
@@ -224,10 +224,13 @@ async fn resolve_category(wf: &Wayfinder, input: Option<&str>) -> anyhow::Result
 
 #[tool_handler(router = self.tool_router)]
 impl ServerHandler for WayfinderServer {
-    fn get_info(&self) -> ServerInfo {
-        let mut info = ServerInfo::new(ServerCapabilities::builder().enable_tools().build());
-        info.server_info = Implementation::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
-        info.with_instructions(format!(
+    fn get_info(&self) -> ServerConfig {
+        ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
+            .with_server_info(Implementation::new(
+                env!("CARGO_PKG_NAME"),
+                env!("CARGO_PKG_VERSION"),
+            ))
+            .with_instructions(format!(
             "Query Pathfinder 2e and Starfinder 2e game data from Archives of Nethys. Every tool \
              takes an optional `game` parameter: \"pf2e\" (Pathfinder 2e, the default) or \"sf2e\" \
              (Starfinder 2e). Use `search` to find entries (filter by category, traits, level, \

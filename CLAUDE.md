@@ -117,7 +117,8 @@ crate (see the global CLAUDE.md for why the flags are needed).
   `format.rs` lays results out for a model. No queries or AON logic here.
 - Tool bodies return `anyhow::Result<String>`; `respond` turns failures into
   `isError` tool results (which the model sees), not JSON-RPC errors.
-- `rmcp` 2.x: tool results use `ContentBlock` (not `Content`).
+- `rmcp` 3.x: tool results use `ContentBlock`; `ServerHandler::get_info` returns
+  `ServerConfig` (renamed from `ServerInfo`, which 3.x deprecates).
 - Verify tool changes against LIVE AON by driving stdio JSON-RPC, not just a
   compile -- the tool surface must keep matching real Nethys results.
 - stdio-only today; cloud clients (Claude.ai web/mobile, ChatGPT) need a remote
