@@ -121,9 +121,10 @@ crate (see the global CLAUDE.md for why the flags are needed).
   `ServerConfig` (renamed from `ServerInfo`, which 3.x deprecates).
 - Verify tool changes against LIVE AON by driving stdio JSON-RPC, not just a
   compile -- the tool surface must keep matching real Nethys results.
-- stdio-only today; cloud clients (Claude.ai web/mobile, ChatGPT) need a remote
-  HTTP transport (rmcp ships one) that is not wired yet. Per-client setup lives
-  in `docs/mcp-setup.md`.
+- stdio-only by decision. Cloud clients (Claude.ai web/mobile, ChatGPT) need a
+  remote HTTP transport, and a public endpoint with no client identity would be
+  an open relay, so it is out of scope (issue #18, closed as undesirable).
+  Per-client setup lives in `docs/mcp-setup.md`.
 
 ## References
 `references/` (.gitignored) holds AON exploration aids: `category_fields.json`,

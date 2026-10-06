@@ -35,8 +35,9 @@ cargo install wayfinder-mcp
 ## Configure an MCP client
 
 It is a **stdio** server, so it works with local clients (Claude Desktop, Claude
-Code, Codex CLI). Cloud clients (Claude.ai web/mobile, ChatGPT) need a remote
-HTTP transport, which is not shipped yet.
+Code, Codex CLI). Cloud clients (Claude.ai web/mobile, ChatGPT) are
+remote-only; serving a public HTTP endpoint is out of scope by design, since
+without a client identity in the transport it is an open relay.
 
 Point your client at the installed binary. For Claude Desktop, use the
 **absolute** path (GUI apps do not inherit your shell `PATH`) from

@@ -4,7 +4,8 @@
 process and talks to it over stdin/stdout. That means it works today with local
 desktop and CLI clients. Cloud clients (Claude.ai web/mobile, ChatGPT) connect
 to MCP servers from the vendor's servers over the public internet and need a
-**remote HTTP** server, which wayfinder-mcp does not provide yet.
+**remote HTTP** server, which wayfinder-mcp deliberately does not provide; see
+[Remote HTTP transport is out of scope](#remote-http-transport-is-out-of-scope).
 
 ## Compatibility at a glance
 
@@ -13,14 +14,15 @@ to MCP servers from the vendor's servers over the public internet and need a
 | Claude Desktop (macOS/Windows) | Yes | stdio (local) | Yes |
 | Claude Code (CLI) | Yes | stdio (local) | Yes |
 | Codex CLI (OpenAI) | Yes | stdio (local) | Yes |
-| Claude.ai web | Yes, remote-only | Remote HTTPS | No, needs remote transport |
-| Claude mobile (iOS/Android) | Yes, remote-only | Remote HTTPS | No, needs remote transport |
-| ChatGPT web (Developer Mode) | Yes, remote-only | Remote HTTPS | No, needs remote transport |
+| Claude.ai web | Yes, remote-only | Remote HTTPS | No, out of scope by design |
+| Claude mobile (iOS/Android) | Yes, remote-only | Remote HTTPS | No, out of scope by design |
+| ChatGPT web (Developer Mode) | Yes, remote-only | Remote HTTPS | No, out of scope by design |
 | ChatGPT desktop / mobile | No custom MCP | Remote HTTPS | No |
 
 Three clients work out of the box today, all local/CLI. Every web and mobile
-surface, for both Claude and ChatGPT, is blocked on adding a remote HTTP
-transport (see [Adding a remote transport](#adding-a-remote-transport)).
+surface is remote-only, and shipping a remote endpoint is out of scope by
+design rather than merely unbuilt (see
+[Remote HTTP transport is out of scope](#remote-http-transport-is-out-of-scope)).
 
 ## Install
 
@@ -92,18 +94,18 @@ command = "wayfinder-mcp"
 
 This config is shared with the Codex IDE extension.
 
-## Claude.ai web (not supported yet, needs a remote transport)
+## Claude.ai web (not supported: remote-only)
 
 Claude.ai supports custom connectors via remote MCP (Settings, Connectors, Add
 custom connector), but it connects from Anthropic's cloud to a public HTTPS URL.
-It cannot launch a local stdio binary, so wayfinder-mcp cannot be added here yet.
+It cannot launch a local stdio binary, so wayfinder-mcp cannot be added here.
 
-## Claude mobile / iOS / Android (not supported yet)
+## Claude mobile / iOS / Android (not supported: remote-only)
 
 Claude mobile can use remote MCP connectors, but only ones you added on the
-Claude.ai website. Same blocker: remote HTTPS only, no stdio.
+Claude.ai website. Same reason: remote HTTPS only, no stdio.
 
-## ChatGPT web, Developer Mode (not supported yet)
+## ChatGPT web, Developer Mode (not supported: remote-only)
 
 ChatGPT's Developer Mode supports MCP, but only remote MCP servers over HTTPS,
 not local stdio servers. Availability is gated by plan (Plus/Pro/Business/
@@ -116,11 +118,20 @@ a user-side workaround, not something wayfinder ships.
 Custom MCP connectors are a web-only feature; the ChatGPT desktop and mobile
 apps do not offer custom connector setup, and it would be remote-only anyway.
 
-## Adding a remote transport
+## Remote HTTP transport is out of scope
 
-To reach Claude.ai web, Claude mobile, and ChatGPT, wayfinder-mcp needs a
-Streamable HTTP endpoint on a public HTTPS URL. `rmcp` (already a dependency)
-ships a streamable-http server transport, so this is additive rather than a
-rewrite: a feature flag or second binary mode serving the same server. Because
-this server is read-only over public game data with no secrets, hosting risk is
-low. This is tracked as a post-launch enhancement.
+A remote endpoint is a public HTTPS URL that vendor cloud servers connect to,
+and MCP's HTTP transport carries no client identity of its own. Serving one
+would make wayfinder-mcp an open relay: anyone who learns the URL gets the whole
+tool surface, and every call spends this host's bandwidth and CPU fetching and
+parsing Archives of Nethys pages, with no quota to enforce and no way to revoke
+or even attribute a caller. "The server holds no secrets" answers what a caller
+could read; it says nothing about who pays for the work.
+
+So the transport stays stdio, where the client launches a process per user and
+bears the cost of the calls it makes. If you want a cloud client regardless, the
+bridge belongs on your side of the line: expose your own stdio server through a
+tool like `mcp-remote` plus a tunnel you control, so the traffic and the blame
+stay yours (the ChatGPT section above covers this).
+
+This was tracked as issue #18 and closed as undesirable.

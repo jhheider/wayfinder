@@ -90,9 +90,11 @@ Claude things like *"What does the Grab an Edge action do in PF2e?"* and it
 looks them up live.
 
 It is a **stdio** server, so it works today with **Claude Desktop, Claude Code,
-and Codex CLI**. Cloud clients (Claude.ai web/mobile, ChatGPT) need a remote
-HTTP server, which is not shipped yet. Full per-client instructions and the
-compatibility matrix are in **[docs/mcp-setup.md](docs/mcp-setup.md)**.
+and Codex CLI**. Cloud clients (Claude.ai web/mobile, ChatGPT) are
+remote-only, and serving a public HTTP endpoint is out of scope by design: with
+no client identity in the transport it would be an open relay for anyone who
+finds the URL. Full per-client instructions and the compatibility matrix are in
+**[docs/mcp-setup.md](docs/mcp-setup.md)**.
 
 Quick start with Claude Code:
 
