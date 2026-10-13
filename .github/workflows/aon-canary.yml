@@ -2,8 +2,9 @@ name: AON canary
 
 # wayfinder hard-codes facts about Archives of Nethys's Elasticsearch indexes
 # (index names, fields, category keys) that mocks cannot catch going stale.
-# Weekly, run the live checks in crates/wayfinder-core/tests/live_test.rs and
-# open an issue when they fail, unless one is already open.
+# Weekly, run the live checks in crates/wayfinder-core/tests/live_test.rs,
+# open an issue when they fail (unless one is already open), and close any
+# still-open one when they pass.
 
 on:
   schedule:
@@ -62,3 +63,16 @@ jobs:
           } > body.md
           gh issue create --title "AON canary: live checks failing" \
             --label aon-canary --body-file body.md
+      - name: Close issues fixed by this run
+        if: success() && steps.live.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          numbers=$(gh issue list --label aon-canary --state open --json number --jq '.[].number')
+          if [ -z "$numbers" ]; then
+            echo "No open aon-canary issues."; exit 0
+          fi
+          for n in $numbers; do
+            gh issue close "$n" --comment "Live checks passed in [this run]($RUN_URL); closing."
+          done

@@ -16,6 +16,7 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "anchor",
     "animal-companion",
     "animal-companion-advanced",
+    "animal-companion-advancement",
     "animal-companion-specialization",
     "animal-companion-unique",
     "apparition",
@@ -34,6 +35,7 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "class-feature",
     "class-kit",
     "class-sample",
+    "companion",
     "computer",
     "condition",
     "connection",
@@ -57,6 +59,7 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "element",
     "epithet",
     "equipment",
+    "exocortex",
     "faction",
     "familiar-ability",
     "familiar-specific",
@@ -90,10 +93,12 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "plane",
     "planet",
     "practice",
+    "programming-language",
     "racket",
     "relic",
     "research-field",
     "ritual",
+    "robot-customization",
     "rules",
     "runesmith-rune",
     "set-relic",
@@ -106,7 +111,12 @@ pub const ALL_CATEGORIES: &[&str] = &[
     "source",
     "specialization",
     "spell",
+    "starship-battle-station",
+    "starship-drone",
+    "starship-expansion-bay",
+    "starship-frame",
     "starship-scene",
+    "starship-weapon",
     "style",
     "subconscious-mind",
     "tactic",
@@ -168,6 +178,7 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
             "methodology",
             "muse",
             "mystery",
+            "exocortex",
             "patron",
             "practice",
             "racket",
@@ -204,17 +215,32 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
             "siege-weapon",
             "ammunition",
             "computer",
+            "programming-language",
+            "robot-customization",
+        ],
+    },
+    CategoryGroup {
+        name: "Starships",
+        members: &[
+            "starship-frame",
+            "starship-weapon",
+            "starship-expansion-bay",
+            "starship-battle-station",
+            "starship-drone",
+            "starship-scene",
         ],
     },
     CategoryGroup {
         name: "Creatures & Companions",
         members: &[
             "creature",
+            "companion",
             "creature-ability",
             "creature-adjustment",
             "creature-family",
             "creature-theme-template",
             "animal-companion",
+            "animal-companion-advancement",
             "animal-companion-advanced",
             "animal-companion-specialization",
             "animal-companion-unique",
@@ -253,7 +279,6 @@ pub const CATEGORY_GROUPS: &[CategoryGroup] = &[
             "rules",
             "article",
             "anchor",
-            "starship-scene",
             "campsite-meal",
             "category-page",
             "cult-activity",
@@ -282,6 +307,18 @@ pub fn category_icon(cat: &str) -> &'static str {
         "heritage" => "🌿",
         "class" => "⚔️",
         "creature" => "🐉",
+        "companion"
+        | "animal-companion"
+        | "animal-companion-advanced"
+        | "animal-companion-advancement"
+        | "animal-companion-specialization"
+        | "animal-companion-unique" => "🐾",
+        "starship-frame"
+        | "starship-weapon"
+        | "starship-expansion-bay"
+        | "starship-battle-station"
+        | "starship-drone"
+        | "starship-scene" => "🚀",
         "equipment" | "armor" | "weapon" | "shield" => "🛡️",
         "background" => "📜",
         "archetype" => "🏛️",
